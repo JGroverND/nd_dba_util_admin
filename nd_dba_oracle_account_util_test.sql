@@ -5,7 +5,8 @@
 -- audit trail
 -- 15-Oct-2022 John W Grover
 --  - Original Code
---
+-- 04-Nov-2022 John W Grover
+--  - Variablized test inputs
 -- -----------------------------------------------------------------------------
 
 begin
@@ -16,15 +17,19 @@ declare
     v_object_type               sys.dba_objects.object_type%type;
 
     -- v_good_account should also be a person account
-    v_good_account              sys.dba_users.account_status%type := 'JGROVER';
-    v_bad_account               sys.dba_users.account_status%type := 'XYZZY';
+    v_good_account              sys.dba_users.username%type := 'JGROVER';
+    v_bad_account               sys.dba_users.username%type := 'XYZZY';
 
     v_good_role                 sys.dba_roles.role%type := 'ND_CONNECT_S_ROLE';
     v_bad_role                  sys.dba_roles.role%type := 'XYZZY';
 
-    v_good_sys_priv             sys.dba_sys_privs%privilege%type := 'CREATE SESSION';
-    v_bad_sys_priv              sys.dba_sys_privs%privilege%type := 'XYZZY';
+    v_good_sys_priv_acct        sys.dba_users.username%type := 'PLUGH';
+    v_bad_sys_priv_acct         sys.dba_users.username%type := 'XYZZY';
+    v_good_sys_priv             sys.dba_sys_privs.privilege%type := 'CREATE SESSION';
+    v_bad_sys_priv              sys.dba_sys_privs.privilege%type := 'XYZZY';
 
+    v_good_obj_priv_acct        sys.dba_users.username%type := 'PLUGH';
+    v_bad_obj_priv_acct         sys.dba_users.username%type := 'XYZZY';
     v_good_object_owner         sys.dba_objects.owner%type := 'JGROVER';
     v_good_object_name          sys.dba_objects.object_name%type := 'TABLE1';
     v_bad_object_owner          sys.dba_objects.owner%type := 'PLUGH';
@@ -36,23 +41,23 @@ declare
     v_good_tablespace_name      sys.dba_tablespaces.tablespace_name%type := 'USERS';
     v_bad_tablespace_name       sys.dba_tablespaces.tablespace_name%type := 'XYZZY';
 
-    v_good_system_account       sys.dba_users.account_status%type := 'SYSTEM';
-    v_bad_system_account        sys.dba_users.account_status%type := 'PLUGH';
+    v_good_system_account       sys.dba_users.username%type := 'SYSTEM';
+    v_bad_system_account        sys.dba_users.username%type := 'PLUGH';
 
-    v_good_owner_account        sys.dba_users.account_status%type := 'JGROVER';
-    v_bad_owner_account         sys.dba_users.account_status%type := 'PLUGH';
+    v_good_owner_account        sys.dba_users.username%type := 'JGROVER';
+    v_bad_owner_account         sys.dba_users.username%type := 'PLUGH';
 
-    v_good_link_account         sys.dba_users.account_status%type := 'ND_ODS_ADMIN_LINK';
-    v_bad_link_account          sys.dba_users.account_status%type := 'PLUGH';
+    v_good_link_account         sys.dba_users.username%type := 'ND_ODS_ADMIN_LINK';
+    v_bad_link_account          sys.dba_users.username%type := 'PLUGH';
 
     v_good_object_permission    sys.dba_tab_privs.privilege%type := 'SELECT';
-    v_bad_object_permission    sys.dba_tab_privs.privilege%type := 'XYZZY';
+    v_bad_object_permission     sys.dba_tab_privs.privilege%type := 'XYZZY';
 
 
-
-    v_ts                sys.dba_tablespaces.tablespace_name%type;
-    v_tts               sys.dba_tablespaces.tablespace_name%type;
-    v_error_count       number := 0;
+    v_test_user                 sys.dba_users.username%type;
+    v_ts                        sys.dba_tablespaces.tablespace_name%type;
+    v_tts                       sys.dba_tablespaces.tablespace_name%type;
+    v_error_count               number := 0;
 begin
 -- -----------------------------------------------------------------------------
 -- F U N C T I O N S
@@ -75,8 +80,8 @@ begin
 
 --    function is_account                 (p_account in sys.dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account  (v_good_account)
-    and not nd_dba_oracle_account_util.is_account               (v_bad_account)
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account      (v_good_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_account (v_bad_account)
     then
         v_pass_fail := 'passed';
     end if;
@@ -184,10 +189,10 @@ begin
 --    function ora_acct_has_sys_priv      (p_account in sys.dba_users.username%type
 --                                        ,p_privilege in sys.system_privilege_map.name%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv       (v_good_account,    v_good_sys_priv)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_bad_account,     v_good_sys_priv)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_good_account,    v_bad_sys_priv)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_bad_account,     v_bad_sys_priv)
+    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv       (v_good_sys_priv_acct,   v_good_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_bad_sys_priv_acct,    v_good_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_good_sys_priv_acct,   v_bad_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_bad_sys_priv_acct,    v_bad_sys_priv)
     then
         v_pass_fail := 'passed';
     end if;
@@ -198,22 +203,22 @@ begin
 --                                        ,p_object_name in sys.dba_objects.object_name%type
 --                                        ,p_object_privilege in sys.dba_tab_privs.privilege%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv     (v_good_account,   v_good_object_owner,   v_good_object_name,  v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_good_object_name,  v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_good_object_name,  v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_good_object_name,  v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_good_object_owner,   v_bad_object_name,   v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_bad_object_name,   v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_bad_object_name,   v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_bad_object_name,   v_good_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_good_object_owner,   v_good_object_name,  v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_good_object_name,  v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_good_object_name,  v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_good_object_name,  v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_good_object_owner,   v_bad_object_name,   v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_bad_object_name,   v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_bad_object_name,   v_bad_object_permission)
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_bad_object_name,   v_bad_object_permission)
+    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv     (v_good_obj_priv_acct,   v_good_object_owner,   v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_good_object_owner,   v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_bad_object_owner,    v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_bad_object_owner,    v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_good_object_owner,   v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_good_object_owner,   v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_bad_object_owner,    v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_bad_object_owner,    v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_good_object_owner,   v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_good_object_owner,   v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_bad_object_owner,    v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_bad_object_owner,    v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_good_object_owner,   v_bad_object_name,   v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_good_object_owner,   v_bad_object_name,   v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_obj_priv_acct,   v_bad_object_owner,    v_bad_object_name,   v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_obj_priv_acct,    v_bad_object_owner,    v_bad_object_name,   v_bad_object_permission)
     then
         v_pass_fail := 'passed';
     end if;
@@ -288,19 +293,19 @@ begin
                                                                  p_default_tablespace => 'TOOLS',
                                                                  p_temporary_tablespace => 'TEMP');
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY5',
-                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+                                                                 p_profile => 'ND_USR_OPEN_DEFAULT');
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY6',
                                                                  p_default_tablespace => 'TOOLS',
-                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+                                                                 p_profile => 'ND_USR_OPEN_DEFAULT');
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY7', 
-                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+                                                                 p_profile => 'ND_USR_OPEN_DEFAULT');
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY8',
                                                                  p_temporary_tablespace => 'TEMP',
-                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+                                                                 p_profile => 'ND_USR_OPEN_DEFAULT');
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY9',
                                                                  p_default_tablespace => 'TOOLS',
                                                                  p_temporary_tablespace => 'TEMP',
-                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+                                                                 p_profile => 'ND_USR_OPEN_DEFAULT');
 
     -- failed to create any of the accounts
     if not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY1')
@@ -316,19 +321,40 @@ begin
         v_error_count := v_error_count + 1;
     end if;
 
-    -- failed to assign proper ts, tts, profile to accounts
-    -- XYZZY2 v_ts
+    -- test proper ts, tts, profile on accounts
+    -- ---------------------------------
+    v_test_user := 'XYZZY1';
     select default_tablespace into v_ts
       from dba_users 
-     where username = 'XYZZY2';
+     where username = v_test_user;
 
     select temporary_tablespace into v_tts
       from dba_users 
-     where username = 'XYZZY2';
+     where username = v_test_user;
 
     select profile into v_profile
       from dba_users 
-     where username = 'XYZZY2';
+     where username = v_test_user;
+
+    if v_ts != 'USERS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    -- ---------------------------------
+    v_test_user := 'XYZZY2';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
 
     if v_ts != 'TOOLS' 
     or v_tts != 'TEMP'
@@ -336,70 +362,143 @@ begin
         v_error_count := v_error_count + 1;
     end if;
 
---  XYZZY3 
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-      from dba_users
-     where username = 'XYZZY3';
-    if v_ts != 'TEMPORARY' then
+    -- ---------------------------------
+    v_test_user := 'XYZZY3';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
+    if v_ts != 'USERS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_LOCK_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
     
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-      from dba_users where username = 'XYZZY4';
+    -- ---------------------------------
+    v_test_user := 'XYZZY4';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
     if v_ts != 'TOOLS' 
-    or v_tts != 'TEMPORARY' then
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_LOCK_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
 
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-     where username = 'XYZZY5';
-     if v_profile != 'ND_USR_LOCK_DEFAULT' then
+    -- ---------------------------------
+    v_test_user := 'XYZZY5';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
+    if v_ts != 'USERS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_OPEN_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
 
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-      from dba_users
-     where username = 'XYZZY6';
-     if v_ts != 'TOOLS'
-     or v_profile != 'ND_USR_LOCK_DEFAULT' then
+    -- ---------------------------------
+    v_test_user := 'XYZZY6';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
+    if v_ts != 'TOOLS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_OPEN_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
 
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-      from dba_users
-     where username = 'XYZZY7';
-     if v_profile != 'ND_USR_LOCK_DEFAULT' then
+    -- ---------------------------------
+    v_test_user := 'XYZZY7';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
+    if v_ts != 'USERS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_OPEN_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
 
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-      from dba_users
-     where username = 'XYZZY8';
-     if v_tts != 'TEMP'
-     or v_profile != 'ND_USR_LOCK_DEFAULT' then
+    -- ---------------------------------
+    v_test_user := 'XYZZY8';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
+    if v_ts != 'USERS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_OPEN_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
 
-    select default_tablespace into v_ts,
-           temporary_tablespace into v_tts,
-           profile into v_profile
-      from dba_users
-     where username = 'XYZZY9';
+    -- ---------------------------------
+    v_test_user := 'XYZZY9';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+    select profile into v_profile
+      from dba_users 
+     where username = v_test_user;
+
      if v_ts != 'TOOLS'
      or v_tts != 'TEMP'
-     or v_profile != 'ND_USR_LOCK_DEFAULT' then
+     or v_profile != 'ND_USR_OPEN_DEFAULT' then
         v_error_count := v_error_count + 1;
     end if;
 
@@ -442,3 +541,4 @@ begin
 
 end;
 end;
+
