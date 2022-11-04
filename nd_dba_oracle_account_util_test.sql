@@ -14,6 +14,9 @@ declare
     v_account_status    sys.dba_users.account_status%type;
     v_profile           sys.dba_users.profile%type;
     v_object_type       sys.dba_objects.object_type%type;
+    v_ts                sys.dba_tablespaces.tablespace_name%type;
+    v_tts               sys.dba_tablespaces.tablespace_name%type;
+    v_error_count       number := 0;
 begin
 -- -----------------------------------------------------------------------------
 -- F U N C T I O N S
@@ -23,7 +26,7 @@ begin
 -- Binary functions
 -- Oct 2022 JWG - Test all input parameter permutations valid/invalid values
 --                Assumes: 
---                - 'XYZZY', though magical, is an invalid input for 
+--                - 'XYZZY%', though magical, is an invalid input for 
 --                  any parameter
 --                - JGROVER is a valid person account 
 --                  and owns ND_DBA_ORACLE_ACCOUNT_UTIL
@@ -234,6 +237,140 @@ begin
 --                                        ,p_default_tablespace in sys.dba_users.default_tablespace%type default 'USERS'
 --                                        ,p_temporary_tablespace in sys.dba_users.temporary_tablespace%type default 'TEMP'
 --                                        ,p_profile in sys.dba_users.profile%type default 'ND_USR_LOCK_DEFAULT');
+    v_error_count := 0;
+    v_pass_fail := 'failed';
+
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY1');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY2', 
+                                                                 p_default_tablespace => 'TOOLS');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY3', 
+                                                                 p_temporary_tablespace => 'TEMP');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY4', 
+                                                                 p_default_tablespace => 'TOOLS',
+                                                                 p_temporary_tablespace => 'TEMP');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY5',
+                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY6',
+                                                                 p_default_tablespace => 'TOOLS',
+                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY7', 
+                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY8',
+                                                                 p_temporary_tablespace => 'TEMP',
+                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_create(p_account => 'XYZZY9',
+                                                                 p_default_tablespace => 'TOOLS',
+                                                                 p_temporary_tablespace => 'TEMP',
+                                                                 p_profile => 'ND_USR_LOCK_DEFAULT');
+
+    -- failed to create any of the accounts
+    if not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY1')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY2')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY3')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY4')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY5')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY6')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY7')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY8')
+    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY9')
+    then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    -- failed to assign proper ts, tts, profile to accounts
+    -- XYZZY2 v_ts
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = 'XYZZY2';
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = 'XYZZY2';
+
+    select profile into v_profile
+      from dba_users 
+     where username = 'XYZZY2';
+
+    if v_ts != 'TOOLS' 
+    or v_tts != 'TEMP'
+    or v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+--  XYZZY3 
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+      from dba_users
+     where username = 'XYZZY3';
+    if v_ts != 'TEMPORARY' then
+        v_error_count := v_error_count + 1;
+    end if;
+    
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+      from dba_users where username = 'XYZZY4';
+    if v_ts != 'TOOLS' 
+    or v_tts != 'TEMPORARY' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+     where username = 'XYZZY5';
+     if v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+      from dba_users
+     where username = 'XYZZY6';
+     if v_ts != 'TOOLS'
+     or v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+      from dba_users
+     where username = 'XYZZY7';
+     if v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+      from dba_users
+     where username = 'XYZZY8';
+     if v_tts != 'TEMP'
+     or v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    select default_tablespace into v_ts,
+           temporary_tablespace into v_tts,
+           profile into v_profile
+      from dba_users
+     where username = 'XYZZY9';
+     if v_ts != 'TOOLS'
+     or v_tts != 'TEMP'
+     or v_profile != 'ND_USR_LOCK_DEFAULT' then
+        v_error_count := v_error_count + 1;
+    end if;
+
+    if v_error_count = 0
+    then
+        v_pass_fail := 'passed';
+    end if;
+
+    DBMS_OUTPUT.PUT_LINE('ora_acct_create ' || v_pass_fail);
+
 --    procedure ora_acct_lock             (p_account in sys.dba_users.username%type);
 --    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
 --    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type

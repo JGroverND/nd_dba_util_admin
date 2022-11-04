@@ -2,7 +2,7 @@ create or replace package nd_dba_util_admin.nd_dba_oracle_account_util
 IS
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_oracle_account_util.sql
--- desc: 
+-- desc: Functions and procedures for managing Oracle accounts
 --
 -- audit trail
 -- October 2022 John W Grover
@@ -10,6 +10,7 @@ IS
 --  - See package body for detailed comments
 --
 -- -----------------------------------------------------------------------------
+
 -- E X C E P T I O N S
    e_account_exists           exception; -- -20001
    e_invalid_account          exception; -- -20002
