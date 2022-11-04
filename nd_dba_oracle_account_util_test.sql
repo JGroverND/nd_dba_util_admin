@@ -10,10 +10,46 @@
 
 begin
 declare
-    v_pass_fail         varchar2(6);
-    v_account_status    sys.dba_users.account_status%type;
-    v_profile           sys.dba_users.profile%type;
-    v_object_type       sys.dba_objects.object_type%type;
+    v_pass_fail                 varchar2(6);
+    v_account_status            sys.dba_users.account_status%type;
+    v_profile                   sys.dba_users.profile%type;
+    v_object_type               sys.dba_objects.object_type%type;
+
+    -- v_good_account should also be a person account
+    v_good_account              sys.dba_users.account_status%type := 'JGROVER';
+    v_bad_account               sys.dba_users.account_status%type := 'XYZZY';
+
+    v_good_role                 sys.dba_roles.role%type := 'ND_CONNECT_S_ROLE';
+    v_bad_role                  sys.dba_roles.role%type := 'XYZZY';
+
+    v_good_sys_priv             sys.dba_sys_privs%privilege%type := 'CREATE SESSION';
+    v_bad_sys_priv              sys.dba_sys_privs%privilege%type := 'XYZZY';
+
+    v_good_object_owner         sys.dba_objects.owner%type := 'JGROVER';
+    v_good_object_name          sys.dba_objects.object_name%type := 'TABLE1';
+    v_bad_object_owner          sys.dba_objects.owner%type := 'PLUGH';
+    v_bad_object_name           sys.dba_objects.object_name%type := 'XYZZY';
+
+    v_good_profile              sys.dba_profiles.profile%type := 'ND_USR_OPEN_DEFAULT';
+    v_bad_profile               sys.dba_profiles.profile%type := 'XYZZY';
+
+    v_good_tablespace_name      sys.dba_tablespaces.tablespace_name%type := 'USERS';
+    v_bad_tablespace_name       sys.dba_tablespaces.tablespace_name%type := 'XYZZY';
+
+    v_good_system_account       sys.dba_users.account_status%type := 'SYSTEM';
+    v_bad_system_account        sys.dba_users.account_status%type := 'PLUGH';
+
+    v_good_owner_account        sys.dba_users.account_status%type := 'JGROVER';
+    v_bad_owner_account         sys.dba_users.account_status%type := 'PLUGH';
+
+    v_good_link_account         sys.dba_users.account_status%type := 'ND_ODS_ADMIN_LINK';
+    v_bad_link_account          sys.dba_users.account_status%type := 'PLUGH';
+
+    v_good_object_permission    sys.dba_tab_privs.privilege%type := 'SELECT';
+    v_bad_object_permission    sys.dba_tab_privs.privilege%type := 'XYZZY';
+
+
+
     v_ts                sys.dba_tablespaces.tablespace_name%type;
     v_tts               sys.dba_tablespaces.tablespace_name%type;
     v_error_count       number := 0;
@@ -26,7 +62,7 @@ begin
 -- Binary functions
 -- Oct 2022 JWG - Test all input parameter permutations valid/invalid values
 --                Assumes: 
---                - 'XYZZY%', though magical, is an invalid input for 
+--                - v_bad_account, though magical, is an invalid input for 
 --                  any parameter
 --                - JGROVER is a valid person account 
 --                  and owns ND_DBA_ORACLE_ACCOUNT_UTIL
@@ -39,8 +75,8 @@ begin
 
 --    function is_account                 (p_account in sys.dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account  ('JGROVER')
-    and not nd_dba_oracle_account_util.is_account               ('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account  (v_good_account)
+    and not nd_dba_oracle_account_util.is_account               (v_bad_account)
     then
         v_pass_fail := 'passed';
     end if;
@@ -48,8 +84,8 @@ begin
 
 --    function is_role                    (p_role in sys.dba_roles.role%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_role     ('ND_CONNECT_S_ROLE')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_role('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_role     (v_good_role)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_role(v_bad_role)
     then
          v_pass_fail := 'passed';
     end if;
@@ -57,8 +93,8 @@ begin
     
 --    function is_sys_priv                (p_privilege in sys.system_privilege_map.name%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_priv     ('ALTER USER')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_priv('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_priv     (v_good_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_priv(v_bad_sys_priv)
     then
         v_pass_fail := 'passed';
     end if;
@@ -67,10 +103,10 @@ begin
 --    function is_object                  (p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_object       ('JGROVER', 'ND_DBA_ORACLE_ACCOUNT_UTIL')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_object  ('XYZZY',   'ND_DBA_ORACLE_ACCOUNT_UTIL')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_object  ('JGROVER', 'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_object  ('XYZZY',   'XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_object       (v_good_object_owner,   v_good_object_name)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_object  (v_bad_object_owner,    v_bad_object_name)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_object  (v_good_object_owner,   v_bad_object_name)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_object  (v_bad_object_owner,    v_good_object_name)
     then
         v_pass_fail := 'passed';
     end if;
@@ -78,8 +114,8 @@ begin
     
 --    function is_profile                 (p_profile in sys.dba_profiles.profile%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_profile      ('DEFAULT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_profile ('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_profile      (v_good_profile)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_profile (v_bad_profile)
     then
         v_pass_fail := 'passed';
     end if;
@@ -87,8 +123,8 @@ begin
     
 --    function is_tablespace              (p_tablespace in sys.dba_tablespaces.tablespace_name%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_tablespace       ('USERS')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_tablespace  ('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_tablespace       (v_good_tablespace_name)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_tablespace  (v_bad_tablespace_name)
     then
         v_pass_fail := 'passed';
     end if;
@@ -96,8 +132,8 @@ begin
     
 --    function is_person_acct             (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_person_acct  ('JGROVER')
-    and not     nd_dba_util_admin.nd_dba_oracle_account_util.is_person_acct  ('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_person_acct  (v_good_account)
+    and not     nd_dba_util_admin.nd_dba_oracle_account_util.is_person_acct  (v_bad_account)
     then
         v_pass_fail := 'passed';
     end if;
@@ -105,8 +141,9 @@ begin
     
 --    function is_sys_acct                (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_acct     ('SYSTEM')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_acct('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_acct     (v_good_system_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_acct(v_bad_system_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_acct(v_bad_account)
     then
         v_pass_fail := 'passed';
     end if;
@@ -114,8 +151,9 @@ begin
     
 --    function is_owner_acct              (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_owner_acct       ('JGROVER')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_owner_acct  ('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_owner_acct       (v_good_owner_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_owner_acct  (v_bad_owner_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_owner_acct  (v_bad_account)
     then
         v_pass_fail := 'passed';
     end if;
@@ -123,8 +161,9 @@ begin
     
 --    function is_link_acct               (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_link_acct        ('ND_ABSSOLUTE_NDFIADMIN_LINK')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_link_acct   ('XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_link_acct        (v_good_link_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_link_acct   (v_bad_link_account)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.is_link_acct   (v_bad_account)
     then
         v_pass_fail := 'passed';
     end if;
@@ -133,10 +172,10 @@ begin
 --    function ora_acct_has_role          (p_account in sys.dba_users.username%type
 --                                        ,p_role in sys.dba_roles.role%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role       ('JGROVER', 'ND_CONNECT_S_ROLE')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role  ('XYZZY',   'ND_CONNECT_S_ROLE')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role  ('JGROVER', 'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role  ('XYZZY',   'XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role       (v_good_account,    v_good_role)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role  (v_bad_account,     v_good_role)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role  (v_good_account,    v_bad_role)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role  (v_bad_account,     v_bad_role)
     then
         v_pass_fail := 'passed';
     end if;
@@ -145,10 +184,10 @@ begin
 --    function ora_acct_has_sys_priv      (p_account in sys.dba_users.username%type
 --                                        ,p_privilege in sys.system_privilege_map.name%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv       ('JGROVER', 'UNLIMITED TABLESPACE')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  ('XYZZY',   'UNLIMITED TABLESPACE')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  ('JGROVER', 'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  ('XYZZY',   'XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv       (v_good_account,    v_good_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_bad_account,     v_good_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_good_account,    v_bad_sys_priv)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_sys_priv  (v_bad_account,     v_bad_sys_priv)
     then
         v_pass_fail := 'passed';
     end if;
@@ -159,22 +198,22 @@ begin
 --                                        ,p_object_name in sys.dba_objects.object_name%type
 --                                        ,p_object_privilege in sys.dba_tab_privs.privilege%type) return boolean;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv     ('JGROVER',    'SATURN',   'SPRIDEN',  'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'SATURN',   'SPRIDEN',  'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'XYZZY',    'SPRIDEN',  'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'XYZZY',    'SPRIDEN',  'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'SATURN',   'XYZZY',    'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'SATURN',   'XYZZY',    'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'XYZZY',    'XYZZY',    'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'XYZZY',    'XYZZY',    'SELECT')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'SATURN',   'SPRIDEN',  'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'SATURN',   'SPRIDEN',  'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'XYZZY',    'SPRIDEN',  'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'XYZZY',    'SPRIDEN',  'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'SATURN',   'XYZZY',    'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'SATURN',   'XYZZY',    'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('JGROVER',    'XYZZY',    'XYZZY',    'XYZZY')
-    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv('XYZZY',      'XYZZY',    'XYZZY',    'XYZZY')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv     (v_good_account,   v_good_object_owner,   v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_good_object_name,  v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_good_object_owner,   v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_bad_object_name,   v_good_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_good_object_owner,   v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_good_object_name,  v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_good_object_owner,   v_bad_object_name,   v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_good_object_owner,   v_bad_object_name,   v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_good_account,   v_bad_object_owner,    v_bad_object_name,   v_bad_object_permission)
+    and not nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_object_priv(v_bad_account,    v_bad_object_owner,    v_bad_object_name,   v_bad_object_permission)
     then
         v_pass_fail := 'passed';
     end if;
@@ -188,9 +227,9 @@ begin
 --
 --    function ora_acct_status            (p_account in sys.dba_users.username%type) return sys.dba_users.account_status%type;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account('JGROVER')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account(v_good_account)
     then
-        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_status('JGROVER') into v_account_status
+        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_status(v_good_account) into v_account_status
           from dual;
 
         if v_account_status is not null
@@ -202,9 +241,9 @@ begin
 
 --    function ora_acct_suggest_profile   (p_account in sys.dba_users.username%type) return sys.dba_users.profile%type;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account('JGROVER')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account(v_good_account)
     then
-        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_suggest_profile('JGROVER') into v_profile
+        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_suggest_profile(v_good_account) into v_profile
           from dual;
 
         if v_account_status is not null
@@ -217,9 +256,9 @@ begin
 --    function ora_object_type            (p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type) return sys.dba_objects.object_type%type;
     v_pass_fail := 'failed';
-    if nd_dba_util_admin.nd_dba_oracle_account_util.is_object('JGROVER', 'ND_DBA_ORACLE_ACCOUNT_UTIL')
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_object(v_good_owner_account, v_good_object_name)
     then
-        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_object_type('JGROVER', 'ND_DBA_ORACLE_ACCOUNT_UTIL') into v_object_type
+        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_object_type(v_good_owner_account, v_good_object_name) into v_object_type
           from dual;
 
         if v_object_type is not null
