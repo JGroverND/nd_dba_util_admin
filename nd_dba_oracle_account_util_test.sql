@@ -309,14 +309,14 @@ begin
 
     -- failed to create any of the accounts
     if not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY1')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY2')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY3')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY4')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY5')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY6')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY7')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY8')
-    or     nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY9')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY2')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY3')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY4')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY5')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY6')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY7')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY8')
+    or not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY9')
     then
         v_error_count := v_error_count + 1;
     end if;
@@ -339,7 +339,7 @@ begin
     if v_ts != 'USERS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_LOCK_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 2;
     end if;
 
     -- ---------------------------------
@@ -359,7 +359,7 @@ begin
     if v_ts != 'TOOLS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_LOCK_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 4;
     end if;
 
     -- ---------------------------------
@@ -379,7 +379,7 @@ begin
     if v_ts != 'USERS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_LOCK_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 8;
     end if;
     
     -- ---------------------------------
@@ -399,7 +399,7 @@ begin
     if v_ts != 'TOOLS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_LOCK_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 16;
     end if;
 
     -- ---------------------------------
@@ -419,7 +419,7 @@ begin
     if v_ts != 'USERS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_OPEN_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 32;
     end if;
 
     -- ---------------------------------
@@ -439,7 +439,7 @@ begin
     if v_ts != 'TOOLS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_OPEN_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 64;
     end if;
 
     -- ---------------------------------
@@ -459,7 +459,7 @@ begin
     if v_ts != 'USERS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_OPEN_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 128;
     end if;
 
     -- ---------------------------------
@@ -479,7 +479,7 @@ begin
     if v_ts != 'USERS' 
     or v_tts != 'TEMP'
     or v_profile != 'ND_USR_OPEN_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 256;
     end if;
 
     -- ---------------------------------
@@ -499,7 +499,7 @@ begin
      if v_ts != 'TOOLS'
      or v_tts != 'TEMP'
      or v_profile != 'ND_USR_OPEN_DEFAULT' then
-        v_error_count := v_error_count + 1;
+        v_error_count := v_error_count + 512;
     end if;
 
     if v_error_count = 0
@@ -507,7 +507,7 @@ begin
         v_pass_fail := 'passed';
     end if;
 
-    DBMS_OUTPUT.PUT_LINE('ora_acct_create ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE('ora_acct_create ' || v_pass_fail || ' code: ' || to_char(v_error_count));
 
 --    procedure ora_acct_lock             (p_account in sys.dba_users.username%type);
 --    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
