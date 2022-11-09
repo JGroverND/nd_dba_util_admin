@@ -455,6 +455,8 @@ begin
                       p_account || 
                       ' identified by ' || 
                       f_gen_password() || 
+                      ' profile ' ||
+                      p_profile ||
                       ' default tablespace ' || 
                       p_default_tablespace ||
                       ' temporary tablespace ' ||
