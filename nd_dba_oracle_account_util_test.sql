@@ -530,9 +530,18 @@ begin
             v_pass_fail := 'passed';
         end if;
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_status ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE('ora_acct_lock ' || v_pass_fail);
 
 --    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_drop(p_account => 'XYZZY1');
+
+    v_pass_fail := 'failed';
+    if not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY1')
+    then
+        v_pass_fail := 'passed';
+    end if;
+    DBMS_OUTPUT.PUT_LINE('ora_acct_drop ' || v_pass_fail);
+
 --    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type
 --                                        ,p_profile in sys.dba_users.profile%type);
 --    procedure ora_acct_change_tablespace(p_account in sys.dba_users.username%type
