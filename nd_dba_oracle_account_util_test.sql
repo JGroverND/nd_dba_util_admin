@@ -7,6 +7,13 @@
 --  - Original Code
 -- 04-Nov-2022 John W Grover
 --  - Variablized test inputs
+--
+-- create user plugh
+--     identified by R1GR2DJQ9MVITXJH1LB7ISPHNBD1M6
+--     default tablespace users
+--     temporary tablespace temp;
+-- grant create session to plugh;
+-- grant select on jgrover.table1 to plugh;
 -- -----------------------------------------------------------------------------
 
 begin
@@ -510,6 +517,21 @@ begin
     DBMS_OUTPUT.PUT_LINE('ora_acct_create ' || v_pass_fail || ' code: ' || to_char(v_error_count));
 
 --    procedure ora_acct_lock             (p_account in sys.dba_users.username%type);
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_lock(p_account => 'XYZZY1');
+
+    v_pass_fail := 'failed';
+    if nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY1')
+    then
+        select nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_status('XYZZY1') into v_account_status
+          from dual;
+
+        if v_account_status = 'LOCKED'
+        then
+            v_pass_fail := 'passed';
+        end if;
+    end if;
+    DBMS_OUTPUT.PUT_LINE('ora_acct_status ' || v_pass_fail);
+
 --    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
 --    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type
 --                                        ,p_profile in sys.dba_users.profile%type);
