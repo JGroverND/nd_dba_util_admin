@@ -544,6 +544,19 @@ begin
 
 --    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type
 --                                        ,p_profile in sys.dba_users.profile%type);
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_profile(p_account => 'XYZZY2',
+                                                                        p_profile => 'DEFAULT');
+    v_pass_fail := 'failed';
+    select profile into v_profile 
+      from dba_users 
+     where username = 'XYZZY2';
+
+    if v_profile = 'DEFAULT'
+    then
+        v_pass_fail := 'passed';
+    end if;
+    DBMS_OUTPUT.PUT_LINE('ora_acct_change_profile ' || v_pass_fail);
+
 --    procedure ora_acct_change_tablespace(p_account in sys.dba_users.username%type
 --                                        ,p_default_tablespace in sys.dba_users.default_tablespace%type default 'USERS'
 --                                        ,p_temporary_tablespace in sys.dba_users.temporary_tablespace%type default 'TEMP');
