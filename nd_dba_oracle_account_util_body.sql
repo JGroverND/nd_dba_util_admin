@@ -620,17 +620,23 @@ end ora_acct_grant_role_list;
 procedure ora_acct_change_default_role (p_account in sys.dba_users.username%type,
                                         p_role in sys.dba_roles.role%type) is
 begin
+--
+-- not implemented: default role all except
+--            note: default role all will not include password protected roles
+--
     if not is_account(p_account)
     then
         raise e_invalid_account;
     end if;
 
     if not is_role(p_role)
+    and upper(p_role) != 'ALL'
     then
         raise e_invalid_role;
     end if;
 
     if not ora_acct_has_role(p_account, p_role)
+    and upper(p_role) != 'ALL'
     then
         ora_acct_grant_role(p_account, p_role);
     end if;
