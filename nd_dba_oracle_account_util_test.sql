@@ -7,13 +7,27 @@
 --  - Original Code
 -- 04-Nov-2022 John W Grover
 --  - Variablized test inputs
---
--- create user plugh
---     identified by R1GR2DJQ9MVITXJH1LB7ISPHNBD1M6
---     default tablespace users
---     temporary tablespace temp;
--- grant create session to plugh;
--- grant select on jgrover.table1 to plugh;
+/*
+create user plugh
+    identified by R1GR2DJQ9MVITXJH1LB7ISPHNBD1M6
+    default tablespace users
+    temporary tablespace temp;
+
+grant create session to plugh;
+grant select on jgrover.table1 to plugh;
+
+begin
+declare 
+    i number        := 0;
+    c varchar2(200) := null;
+    begin
+        for i in 1..9 loop
+            c := 'DROP USER XYZZY' || i || ' CASCADE';
+            execute immediate c;
+        end loop;
+    end;
+end;
+*/
 -- -----------------------------------------------------------------------------
 
 begin
@@ -65,6 +79,9 @@ declare
     v_ts                        sys.dba_tablespaces.tablespace_name%type;
     v_tts                       sys.dba_tablespaces.tablespace_name%type;
     v_error_count               number := 0;
+
+    i                           number := 0;
+    c                           varchar2(200) := null;
 begin
 -- -----------------------------------------------------------------------------
 -- F U N C T I O N S
@@ -84,6 +101,16 @@ begin
 --                - USERS is a valid tablespace
 --                - ND_ABSSOLUTE_NDFIADMIN_LINK is a valid link account
 -- -----------------------------------------------------------------------------
+    dbms_output.put_line('cleanup');
+
+    for i in 1..9 loop
+        if nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY' || i)
+        then
+            c := 'DROP USER XYZZY' || i || ' CASCADE';
+            dbms_output.put_line(c);
+            execute immediate c;
+        end if;
+    end loop;
 
 --    function is_account                 (p_account in sys.dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
@@ -92,7 +119,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_account ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_account ');
 
 --    function is_role                    (p_role in sys.dba_roles.role%type) return boolean;
     v_pass_fail := 'failed';
@@ -101,7 +128,7 @@ begin
     then
          v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_role ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_role ');
     
 --    function is_sys_priv                (p_privilege in sys.system_privilege_map.name%type) return boolean;
     v_pass_fail := 'failed';
@@ -110,7 +137,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_sys_priv ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_sys_priv ');
     
 --    function is_object                  (p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type) return boolean;
@@ -122,7 +149,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_object ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_object ');
     
 --    function is_profile                 (p_profile in sys.dba_profiles.profile%type) return boolean;
     v_pass_fail := 'failed';
@@ -131,7 +158,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_profile ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_profile ');
     
 --    function is_tablespace              (p_tablespace in sys.dba_tablespaces.tablespace_name%type) return boolean;
     v_pass_fail := 'failed';
@@ -140,7 +167,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_tablespace ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_tablespace ');
     
 --    function is_person_acct             (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
@@ -149,7 +176,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_person_acct ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_person_acct ');
     
 --    function is_sys_acct                (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
@@ -159,7 +186,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_sys_acct ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_sys_acct ');
     
 --    function is_owner_acct              (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
@@ -169,7 +196,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_owner_acct ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_owner_acct ');
     
 --    function is_link_acct               (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
@@ -179,7 +206,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('is_link_acct ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_link_acct ');
     
 --    function ora_acct_has_role          (p_account in sys.dba_users.username%type
 --                                        ,p_role in sys.dba_roles.role%type) return boolean;
@@ -191,7 +218,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_has_role ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_has_role ');
     
 --    function ora_acct_has_sys_priv      (p_account in sys.dba_users.username%type
 --                                        ,p_privilege in sys.system_privilege_map.name%type) return boolean;
@@ -203,7 +230,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_has_sys_priv ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_has_sys_priv ');
     
 --    function ora_acct_has_object_priv   (p_account in sys.dba_users.username%type
 --                                        ,p_owner in sys.dba_objects.owner%type
@@ -229,7 +256,7 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_has_object_priv ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_has_object_priv ');
     
 -- -----------------------------------------------------------------------------
 -- Non-binary functions
@@ -249,7 +276,7 @@ begin
             v_pass_fail := 'passed';
         end if;
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_status ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_status ');
 
 --    function ora_acct_suggest_profile   (p_account in sys.dba_users.username%type) return sys.dba_users.profile%type;
     v_pass_fail := 'failed';
@@ -263,7 +290,7 @@ begin
             v_pass_fail := 'passed';
         end if;
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_suggest_profile ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_suggest_profile ');
 
 --    function ora_object_type            (p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type) return sys.dba_objects.object_type%type;
@@ -278,7 +305,7 @@ begin
             v_pass_fail := 'passed';
         end if;
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_object_type ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_object_type ');
 
 -- -----------------------------------------------------------------------------
 --    -- P R O C E D U R E S
@@ -514,7 +541,7 @@ begin
         v_pass_fail := 'passed';
     end if;
 
-    DBMS_OUTPUT.PUT_LINE('ora_acct_create ' || v_pass_fail || ' code: ' || to_char(v_error_count));
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_create ' || ' code: ' || to_char(v_error_count));
 
 --    procedure ora_acct_lock             (p_account in sys.dba_users.username%type);
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_lock(p_account => 'XYZZY1');
@@ -525,41 +552,59 @@ begin
         select nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_status('XYZZY1') into v_account_status
           from dual;
 
-        if v_account_status = 'LOCKED'
+        if v_account_status like '%LOCKED%'
         then
             v_pass_fail := 'passed';
         end if;
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_lock ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_lock ');
 
 --    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
-    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_drop(p_account => 'XYZZY1');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_drop(p_account => 'XYZZY2');
 
     v_pass_fail := 'failed';
-    if not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY1')
+    if not nd_dba_util_admin.nd_dba_oracle_account_util.is_account('XYZZY2')
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_drop ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_drop ');
 
 --    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type
 --                                        ,p_profile in sys.dba_users.profile%type);
-    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_profile(p_account => 'XYZZY2',
-                                                                        p_profile => 'DEFAULT');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_profile(p_account => 'XYZZY3',
+                                                                         p_profile => 'DEFAULT');
     v_pass_fail := 'failed';
     select profile into v_profile 
       from dba_users 
-     where username = 'XYZZY2';
+     where username = 'XYZZY3';
 
     if v_profile = 'DEFAULT'
     then
         v_pass_fail := 'passed';
     end if;
-    DBMS_OUTPUT.PUT_LINE('ora_acct_change_profile ' || v_pass_fail);
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_change_profile ');
 
 --    procedure ora_acct_change_tablespace(p_account in sys.dba_users.username%type
 --                                        ,p_default_tablespace in sys.dba_users.default_tablespace%type default 'USERS'
 --                                        ,p_temporary_tablespace in sys.dba_users.temporary_tablespace%type default 'TEMP');
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_tablespace('XYZZY3', 'TOOLS', 'TEMP');
+
+    v_test_user := 'XYZZY3';
+    select default_tablespace into v_ts
+      from dba_users 
+     where username = v_test_user;
+
+    select temporary_tablespace into v_tts
+      from dba_users 
+     where username = v_test_user;
+
+     if  v_ts = 'TOOLS'
+     and v_tts = 'TEMP' then
+        v_pass_fail := 'passed';
+    end if;
+
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_change_tablespace ');
+
 --    procedure ora_acct_grant_role      (p_account in sys.dba_users.username%type
 --                                        ,p_role  in sys.dba_roles.role%type);
 --    procedure ora_acct_grant_role_list (p_account in sys.dba_users.username%type
