@@ -428,7 +428,7 @@ end ora_object_type;
 procedure ora_acct_create   (p_account in sys.dba_users.username%type
                             ,p_default_tablespace in sys.dba_users.default_tablespace%type default 'USERS'
                             ,p_temporary_tablespace in sys.dba_users.temporary_tablespace%type default 'TEMP'
-                            ,p_profile in sys.dba_users.profile%type default 'ND_USR_LOCK_DEFAULT') IS
+                            ,p_profile in sys.dba_users.profile%type default 'ND_USR_OPEN_DEFAULT') IS
 begin
 
     if is_account(p_account)
@@ -491,6 +491,9 @@ end ora_acct_lock;
 
 procedure ora_acct_drop (p_account in sys.dba_users.username%type) is
 begin
+--
+-- To do: don't drop if finance or HR permissions exist
+--
     if not is_account(p_account)
     then
         raise e_invalid_account;
@@ -711,6 +714,9 @@ end ora_acct_revoke_role_list;
 procedure ora_acct_grant_sys_priv   (p_account in sys.dba_users.username%type
                                     ,p_privilege in sys.system_privilege_map.name%type) is
 begin
+--
+-- To do: some privileges require SYS to grant
+--
     if not is_account(p_account)
     then
         raise e_invalid_account;
