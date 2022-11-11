@@ -117,6 +117,7 @@ begin
         end if;
     end loop;
 
+-- -----------------------------------------------------------------------------
 --    function is_account                 (p_account in sys.dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_account      (v_good_account)
@@ -126,6 +127,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_account ');
 
+-- -----------------------------------------------------------------------------
 --    function is_role                    (p_role in sys.dba_roles.role%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_role     (v_good_role)
@@ -135,6 +137,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_role ');
     
+-- -----------------------------------------------------------------------------
 --    function is_sys_priv                (p_privilege in sys.system_privilege_map.name%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_priv     (v_good_sys_priv)
@@ -144,6 +147,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_sys_priv ');
     
+-- -----------------------------------------------------------------------------
 --    function is_object                  (p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type) return boolean;
     v_pass_fail := 'failed';
@@ -156,6 +160,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_object ');
     
+-- -----------------------------------------------------------------------------
 --    function is_profile                 (p_profile in sys.dba_profiles.profile%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_profile      (v_good_profile)
@@ -165,6 +170,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_profile ');
     
+-- -----------------------------------------------------------------------------
 --    function is_tablespace              (p_tablespace in sys.dba_tablespaces.tablespace_name%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_tablespace       (v_good_tablespace_name)
@@ -174,6 +180,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_tablespace ');
     
+-- -----------------------------------------------------------------------------
 --    function is_person_acct             (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_person_acct  (v_good_account)
@@ -183,6 +190,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_person_acct ');
     
+-- -----------------------------------------------------------------------------
 --    function is_sys_acct                (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_sys_acct     (v_good_system_account)
@@ -193,6 +201,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_sys_acct ');
     
+-- -----------------------------------------------------------------------------
 --    function is_owner_acct              (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_owner_acct       (v_good_owner_account)
@@ -203,6 +212,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_owner_acct ');
     
+-- -----------------------------------------------------------------------------
 --    function is_link_acct               (p_account in dba_users.username%type) return boolean;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_link_acct        (v_good_link_account)
@@ -213,6 +223,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' is_link_acct ');
     
+-- -----------------------------------------------------------------------------
 --    function ora_acct_has_role          (p_account in sys.dba_users.username%type
 --                                        ,p_role in sys.dba_roles.role%type) return boolean;
     v_pass_fail := 'failed';
@@ -225,6 +236,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_has_role ');
     
+-- -----------------------------------------------------------------------------
 --    function ora_acct_has_sys_priv      (p_account in sys.dba_users.username%type
 --                                        ,p_privilege in sys.system_privilege_map.name%type) return boolean;
     v_pass_fail := 'failed';
@@ -237,6 +249,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_has_sys_priv ');
     
+-- -----------------------------------------------------------------------------
 --    function ora_acct_has_object_priv   (p_account in sys.dba_users.username%type
 --                                        ,p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type
@@ -268,7 +281,8 @@ begin
 -- Oct 2022 JWG - Test all input parameter permutations valid/invalid values
 --                against known valid output sets
 -- -----------------------------------------------------------------------------
---
+
+-- -----------------------------------------------------------------------------
 --    function ora_acct_status            (p_account in sys.dba_users.username%type) return sys.dba_users.account_status%type;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_account(v_good_account)
@@ -283,6 +297,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_status ');
 
+-- -----------------------------------------------------------------------------
 --    function ora_acct_suggest_profile   (p_account in sys.dba_users.username%type) return sys.dba_users.profile%type;
     v_pass_fail := 'failed';
     if nd_dba_util_admin.nd_dba_oracle_account_util.is_account(v_good_account)
@@ -297,6 +312,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_suggest_profile ');
 
+-- -----------------------------------------------------------------------------
 --    function ora_object_type            (p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type) return sys.dba_objects.object_type%type;
     v_pass_fail := 'failed';
@@ -641,6 +657,7 @@ begin
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_grant_role_list');
 
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_change_default_role (p_account in sys.dba_users.username%type
 --                                           ,p_role in sys.dba_roles.role%type);
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_default_role('XYZZY6', 'ND_RESOURCE_S_ROLE');
@@ -655,21 +672,31 @@ begin
     then
         v_pass_fail := 'passed';
     end if;
-
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_change_default_role');
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_revoke_role      (p_account in sys.dba_users.username%type
 --                                        ,p_role  in sys.dba_roles.role%type);
+
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_revoke_role_list (p_account in sys.dba_users.username%type
 --                                        ,p_role_list in varchar2);
+
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_grant_sys_priv   (p_account in sys.dba_users.username%type
 --                                        ,p_privilege in sys.system_privilege_map.name%type);
+
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_revoke_sys_priv  (p_account in sys.dba_users.username%type
 --                                        ,p_privilege in sys.system_privilege_map.name%type);
+
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_grant_object_priv(p_account in sys.dba_users.username%type
 --                                        ,p_owner in sys.dba_objects.owner%type
 --                                        ,p_object_name in sys.dba_objects.object_name%type
 --                                        ,p_object_privilege in sys.dba_tab_privs.privilege%type);
+
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_revoke_object_priv  (p_account in sys.dba_users.username%type
 --                                           ,p_owner in sys.dba_objects.owner%type
 --                                           ,p_object_name in sys.dba_objects.object_name%type
