@@ -15,6 +15,9 @@ create user plugh
 
 grant create session to plugh;
 grant select on jgrover.table1 to plugh;
+grant ND_CONNECT_S_ROLE to plugh;
+grant ND_RESOURCE_S_ROLE to plugh;
+alter user plugh default role ND_CONNECT_S_ROLE;
 
 begin
 declare 
@@ -32,6 +35,9 @@ end;
 
 begin
 declare
+    i                           number := 0;
+    c                           varchar2(200) := null;
+
     v_pass_fail                 varchar2(6);
     v_account_status            sys.dba_users.account_status%type;
     v_profile                   sys.dba_users.profile%type;
@@ -74,14 +80,13 @@ declare
     v_good_object_permission    sys.dba_tab_privs.privilege%type := 'SELECT';
     v_bad_object_permission     sys.dba_tab_privs.privilege%type := 'XYZZY';
 
-
     v_test_user                 sys.dba_users.username%type;
     v_ts                        sys.dba_tablespaces.tablespace_name%type;
     v_tts                       sys.dba_tablespaces.tablespace_name%type;
     v_error_count               number := 0;
 
-    i                           number := 0;
-    c                           varchar2(200) := null;
+    v_yes_no                    varchar2(30);
+
 begin
 -- -----------------------------------------------------------------------------
 -- F U N C T I O N S
@@ -543,6 +548,7 @@ begin
 
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_create ' || ' code: ' || to_char(v_error_count));
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_lock             (p_account in sys.dba_users.username%type);
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_lock(p_account => 'XYZZY1');
 
@@ -559,6 +565,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_lock ');
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_drop(p_account => 'XYZZY2');
 
@@ -569,6 +576,7 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_drop ');
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type
 --                                        ,p_profile in sys.dba_users.profile%type);
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_profile(p_account => 'XYZZY3',
@@ -584,10 +592,12 @@ begin
     end if;
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_change_profile ');
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_change_tablespace(p_account in sys.dba_users.username%type
 --                                        ,p_default_tablespace in sys.dba_users.default_tablespace%type default 'USERS'
 --                                        ,p_temporary_tablespace in sys.dba_users.temporary_tablespace%type default 'TEMP');
     nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_tablespace('XYZZY3', 'TOOLS', 'TEMP');
+    v_pass_fail := 'failed';
 
     v_test_user := 'XYZZY3';
     select default_tablespace into v_ts
@@ -605,12 +615,49 @@ begin
 
     DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_change_tablespace ');
 
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_grant_role      (p_account in sys.dba_users.username%type
 --                                        ,p_role  in sys.dba_roles.role%type);
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_grant_role('XYZZY4', 'ND_CONNECT_S_ROLE');
+    v_pass_fail := 'failed';
+
+    if nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role('XYZZY4', 'ND_CONNECT_S_ROLE')
+    then
+        v_pass_fail := 'passed';
+    end if;
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_grant_role');
+
+-- -----------------------------------------------------------------------------
 --    procedure ora_acct_grant_role_list (p_account in sys.dba_users.username%type
 --                                        ,p_role_list in VARCHAR2);
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_grant_role_list('XYZZY5', 'ND_CONNECT_S_ROLE,ND_RESOURCE_S_ROLE');
+    v_pass_fail := 'failed';
+
+    if  nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role('XYZZY5', 'ND_CONNECT_S_ROLE')
+    and nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_has_role('XYZZY5', 'ND_RESOURCE_S_ROLE')
+    then
+        v_pass_fail := 'passed';
+    end if;
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_grant_role_list');
+
+
 --    procedure ora_acct_change_default_role (p_account in sys.dba_users.username%type
 --                                           ,p_role in sys.dba_roles.role%type);
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_change_default_role('XYZZY6', 'ND_RESOURCE_S_ROLE');
+    v_pass_fail := 'failed';
+
+    select default_role into v_yes_no
+      from dba_role_privs 
+     where grantee = 'XYZZY6'
+       and granted_role = 'ND_RESOURCE_S_ROLE';
+
+    if v_yes_no = 'YES'
+    then
+        v_pass_fail := 'passed';
+    end if;
+
+    DBMS_OUTPUT.PUT_LINE(v_pass_fail || ' ora_acct_change_default_role');
+
 --    procedure ora_acct_revoke_role      (p_account in sys.dba_users.username%type
 --                                        ,p_role  in sys.dba_roles.role%type);
 --    procedure ora_acct_revoke_role_list (p_account in sys.dba_users.username%type
