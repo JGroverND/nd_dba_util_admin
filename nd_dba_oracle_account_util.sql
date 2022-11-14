@@ -91,7 +91,11 @@ IS
                                           ,p_object_privilege in sys.dba_tab_privs.privilege%type);
 -- ora_acct_clone_acct(acct, clone)
    procedure ora_role_rename           (p_old_role in sys.dba_roles.role%type,
-                                        P_new_role in sys.dba_roles.role%type);
+                                        p_new_role in sys.dba_roles.role%type);
+   procedure ora_do_command            (p_sql_cmd  in nd_dba_util_admin.audit_log.sql_cmd%type,
+                                        p_undo_cmd in nd_dba_util_admin.audit_log.undo_cmd%type);
+   procedure ora_write_audit_log       (p_sql_cmd  in nd_dba_util_admin.audit_log.sql_cmd%type,
+                                        p_undo_cmd in nd_dba_util_admin.audit_log.undo_cmd%type);
 -- -----------------------------------------------------------------------------
 --                                                   E N D   O F   P A C K A G E
 -- -----------------------------------------------------------------------------

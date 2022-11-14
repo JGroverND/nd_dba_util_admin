@@ -909,8 +909,10 @@ procedure ora_role_rename (p_old_role in sys.dba_roles.role%type,
     from dba_tab_privs
    where grantee = upper(p_old_role)
   union
-  where grantee = upper(p_old_role) ;
-   
+  select 'grant ' || privilege || '(' || column_name || ')' || ' on ' || owner || '.' || table_name || ' to ' || upper(p_new_role) || decode(grantable, 'YES', ' with grant option', '')
+    from dba_col_privs
+  where grantee = upper(p_old_role);
+
   cursor grant_cursor is
   select 'grant ' || upper(p_new_role) || ' to ' || grantee || decode(admin_option, 'YES', ' with admin option', '') sqlcmd
     from dba_role_privs,
@@ -918,7 +920,7 @@ procedure ora_role_rename (p_old_role in sys.dba_roles.role%type,
    where granted_role = upper(p_old_role) 
      and username = grantee
      and profile not like 'ND_SYS%';
-   
+
   cursor revoke_cursor is
   select 'revoke ' || upper(p_old_role) || ' from ' || grantee sqlcmd
     from dba_role_privs,
@@ -948,6 +950,39 @@ begin
     end loop;
 
 end ora_role_rename;
+-- -----------------------------------------------------------------------------
+
+procedure ora_do_command            (p_sql_cmd  in nd_dba_util_admin.audit_log.sql_cmd%type,
+                                     p_undo_cmd in nd_dba_util_admin.audit_log.undo_cmd%type) is
+begin
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_write_audit_log(p_sql_cmd, p_undo_cmd);
+
+    execute immediate p_sql_cmd;
+    
+end ora_do_command;
+-- -----------------------------------------------------------------------------
+
+procedure ora_write_audit_log       (p_sql_cmd  in nd_dba_util_admin.audit_log.sql_cmd%type,
+                                     p_undo_cmd in nd_dba_util_admin.audit_log.undo_cmd%type) is
+begin
+    v_sequence_nbr := v_sequence_nbr + 1;
+
+    insert into nd_dba_util_admin.audit_log (
+        authorization, 
+        activity_date, 
+        username, 
+        sequence_nbr, 
+        sql_cmd, 
+        undo_cmd )
+      values (
+        v_authorization, 
+        sysdate, 
+        user, 
+        v_sequence_nbr, 
+        p_sql_cmd, 
+        p_undo_cmd );
+
+end ora_write_audit_log;
 -- -----------------------------------------------------------------------------
 
 -- -----------------------------------------------------------------------------
