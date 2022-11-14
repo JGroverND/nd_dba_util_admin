@@ -451,10 +451,10 @@ begin
         raise e_invalid_profile;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'create user ' || p_account || ' identified by ' || f_gen_password() || ' profile ' ||p_profile ||
         ' default tablespace ' || p_default_tablespace ||' temporary tablespace ' || p_temporary_tablespace,
-        'drop user ' || p_account || ' cascade')
+        'drop user ' || p_account || ' cascade');
 
     exception
     when e_account_exists then
@@ -474,7 +474,7 @@ begin
         raise e_invalid_account;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'alter user ' || p_account || ' account lock password expire',
         'alter user ' || p_account || ' account unlock');
 
@@ -495,7 +495,7 @@ begin
         raise e_invalid_account;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'drop user ' || p_account || ' cascade',
         'need recreate user logic here');
 
@@ -519,7 +519,7 @@ begin
         raise e_invalid_profile;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'alter user ' || p_account || ' profile ' || p_profile,
         'need restore profile logic here');
 
@@ -551,7 +551,7 @@ begin
         raise e_invalid_tablespace;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'alter user ' || p_account || ' default tablespace ' || p_default_tablespace || ' temporary tablespace ' || p_temporary_tablespace,
         'need restore tablespace logic here');
 
@@ -577,7 +577,7 @@ begin
         raise e_invalid_role;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'grant ' || p_role || ' to ' || p_account,
         'revoke '|| p_role || ' from ' || p_account);
 
@@ -637,7 +637,7 @@ begin
         ora_acct_grant_role(p_account, p_role);
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'alter user ' || p_account || ' default role ' || p_role,
         'need restore default role logic here');
 
@@ -665,7 +665,7 @@ begin
 
     if ora_acct_has_role(p_account, p_role)
     then
-        nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+        nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
             'revoke ' || p_role || ' from ' || p_account,
             'grant ' || p_role || ' to ' || p_account);
     end if;
@@ -720,7 +720,7 @@ begin
 
     if not ora_acct_has_sys_priv(p_account, p_privilege)
     then
-        nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+        nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
             'grant ' || p_privilege || ' to ' || p_account,
             'revoke ' || p_privilege || ' from ' || p_account);
     end if;
@@ -749,7 +749,7 @@ begin
 
     if ora_acct_has_sys_priv(p_account, p_privilege)
     then
-        nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+        nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
             'revoke ' || p_privilege || ' from ' || p_account,
             'grant '|| p_privilege || ' to ' || p_account);
     end if;
@@ -817,7 +817,7 @@ begin
         raise e_unsupported_obj_priv;
     end if;
 
-    nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+    nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         'grant ' || p_object_privilege ||' on ' || p_owner || '.' || p_object_name ||' to ' || p_account,
         'revoke ' || p_object_privilege ||' on ' || p_owner || '.' || p_object_name ||' from ' || p_account);
 
@@ -852,7 +852,7 @@ begin
 
     if ora_acct_has_object_priv (p_account, p_owner, p_object_name, p_object_privilege)
     then
-        nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+        nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
             'revoke ' || p_object_privilege ||' on ' || p_owner || '.' || p_object_name || ' from ' || p_account,
             'grant ' || p_object_privilege ||' on ' || p_owner || '.' || p_object_name || ' to ' || p_account);
     end if;
@@ -913,7 +913,7 @@ begin
     for my_cursor_rec in priv_cursor
     loop
       -- dbms_output.put_line (my_cursor_rec.sqlcmd);
-      nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+      nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         my_cursor_rec.sqlcmd,
         'need additional cursor here');
     end loop;
@@ -921,7 +921,7 @@ begin
     for my_cursor_rec in grant_cursor
     loop
       --dbms_output.put_line (my_cursor_rec.sqlcmd);
-      nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+      nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         my_cursor_rec.sqlcmd,
         'need additional cursor here');
     end loop;
@@ -929,7 +929,7 @@ begin
     for my_cursor_rec in revoke_cursor
     loop
       --dbms_output.put_line (my_cursor_rec.sqlcmd);
-      nd_db_util_admin.nd_dba_oracle_account_util.ora_do_command(
+      nd_dba_util_admin.nd_dba_oracle_account_util.ora_do_command(
         my_cursor_rec.sqlcmd,
         'need additional cursor here');
     end loop;

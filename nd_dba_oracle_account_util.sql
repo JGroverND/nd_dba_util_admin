@@ -59,7 +59,7 @@ IS
    procedure ora_acct_create           (p_account in sys.dba_users.username%type
                                        ,p_default_tablespace in sys.dba_users.default_tablespace%type default 'USERS'
                                        ,p_temporary_tablespace in sys.dba_users.temporary_tablespace%type default 'TEMP'
-                                       ,p_profile in sys.dba_users.profile%type default 'ND_USR_LOCK_DEFAULT');
+                                       ,p_profile in sys.dba_users.profile%type default 'ND_USR_OPEN_DEFAULT');
    procedure ora_acct_lock             (p_account in sys.dba_users.username%type);
    procedure ora_acct_drop             (p_account in sys.dba_users.username%type);
    procedure ora_acct_change_profile   (p_account in sys.dba_users.username%type
