@@ -74,23 +74,23 @@ grant select on sys.dba_users      	to nd_dba_banner_audit_q_role;
 --
 -- Deploy to all Banner databases
 --
-CREATE ROLE nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON bansecr.gtvclas TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON bansecr.guraobj TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON bansecr.gurucls TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON bansecr.guruobj TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON fimsmgr.fobprof TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON fimsmgr.forusfn TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON fimsmgr.forusor TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON general.gobeacc TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON general.gubobjs TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ndfiadmin.fzbzfop TO nd_dba_banner_acctmgmt_u_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ndfiadmin.zownfop TO nd_dba_banner_acctmgmt_u_role;
+create role nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on bansecr.gtvclas to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on bansecr.guraobj to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on bansecr.gurucls to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on bansecr.guruobj to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on fimsmgr.fobprof to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on fimsmgr.forusfn to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on fimsmgr.forusor to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on general.gobeacc to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on general.gubobjs to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on ndfiadmin.fzbzfop to nd_dba_banner_acctmgmt_u_role;
+grant select, insert, update, delete on ndfiadmin.zownfop to nd_dba_banner_acctmgmt_u_role;
 
 --
 -- Deploy to all Banner databases
 --
-CREATE ROLE nd_dba_banner_acctmgmt_x_role;
+create role nd_dba_banner_acctmgmt_x_role;
 grant execcute on nd_dba_util_admin.f_gen_password     to nd_dba_banner_acctmgmt_x_role;
 grant execcute on nd_dba_util_admin.banner_remove_user to nd_dba_banner_acctmgmt_x_role;
 grant execcute on nd_dba_util_admin.banner_lock_user   to nd_dba_banner_acctmgmt_x_role;
@@ -98,36 +98,40 @@ grant execcute on nd_dba_util_admin.banner_lock_user   to nd_dba_banner_acctmgmt
 --
 -- Deploy to all Oracle databases
 --
-CREATE ROLE nd_dba_oracle_acctmgmt_s_role;
-GRANT ALTER USER                TO nd_dba_oracle_acctmgmt_s_role;
-GRANT CREATE ROLE               TO nd_dba_oracle_acctmgmt_s_role;
-GRANT GRANT ANY ROLE            TO nd_dba_oracle_acctmgmt_s_role;
-GRANT SELECT ANY DICTIONARY     TO nd_dba_oracle_acctmgmt_s_role;
-GRANT CREATE MATERIALIZED VIEW  TO nd_dba_oracle_acctmgmt_s_role;
-GRANT CREATE SESSION            TO nd_dba_oracle_acctmgmt_s_role;
-GRANT CREATE TABLE              TO nd_dba_oracle_acctmgmt_s_role;
-GRANT CREATE USER               TO nd_dba_oracle_acctmgmt_s_role;
-GRANT DROP USER                 TO nd_dba_oracle_acctmgmt_s_role;
-GRANT GRANT ANY ROLE            TO nd_dba_oracle_acctmgmt_s_role;
-GRANT UNLIMITED TABLESPACE      TO nd_dba_oracle_acctmgmt_s_role with admin option;
+create role nd_dba_oracle_acctmgmt_s_role;
+grant alter user                to nd_dba_oracle_acctmgmt_s_role;
+grant create role               to nd_dba_oracle_acctmgmt_s_role;
+grant grant any role            to nd_dba_oracle_acctmgmt_s_role;
+grant select any role           to nd_dba_oracle_acctmgmt_s_role;
+grant create materialized view  to nd_dba_oracle_acctmgmt_s_role;
+grant create session            to nd_dba_oracle_acctmgmt_s_role;
+grant create table              to nd_dba_oracle_acctmgmt_s_role;
+grant create user               to nd_dba_oracle_acctmgmt_s_role;
+grant drop user                 to nd_dba_oracle_acctmgmt_s_role;
+grant unlimited tablespace      to nd_dba_oracle_acctmgmt_s_role with admin option;
 
 --
 -- ND_DBA_UTIL_ADMIN backup/audit log table
 --
-CREATE TABLE "ND_DBA_UTIL_ADMIN"."LOG" 
-   ("RFC"               VARCHAR2(40 BYTE)   NOT NULL ENABLE, 
-    "DATE"              DATE                DEFAULT sysdate NOT NULL ENABLE, 	
-    "USERNAME"          VARCHAR2(50 BYTE)   NOT NULL ENABLE, 
-    "LINE"              NUMBER              DEFAULT 0 NOT NULL ENABLE, 
-	  "OPERATION"         VARCHAR2(500 BYTE)  NOT NULL ENABLE, 
-	  "UNDO_OPERATION"    VARCHAR2(500 BYTE)  NOT NULL ENABLE, 
-	  CONSTRAINT "PK_LOG" PRIMARY KEY ("RFC", "LINE"), TABLESPACE "USERS"
-   ) TABLESPACE "USERS" ;
+create table nd_dba_util_admin.audit_log
+(
+    authorization varchar2(40)  not null enable, 
+    activity_date date          default sysdate not null enable, 	
+    username      varchar2(50)  not null enable, 
+    sequence_nbr  number        default 0 not null enable, 
+    sql_cmd       varchar2(500) not null enable, 
+    undo_cmd      varchar2(500) not null enable, 
+    constraint    pk_audit_log  
+      unique (authorization, sequence_nbr)
+      using index
+      tablespace users
+      enable
+) 
+tablespace users ;
 
-   COMMENT ON COLUMN "ND_AUTODEPLOY_USER"."AUTODEPLOY_LOG"."RFC" IS 'RFC Number';
-   COMMENT ON COLUMN "ND_AUTODEPLOY_USER"."AUTODEPLOY_LOG"."DATE" IS 'date/time of deployment';
-   COMMENT ON COLUMN "ND_AUTODEPLOY_USER"."AUTODEPLOY_LOG"."LINE" IS 'keep operations in order';
-   COMMENT ON COLUMN "ND_AUTODEPLOY_USER"."AUTODEPLOY_LOG"."OPERATION" IS 'code that was executed';
-   COMMENT ON COLUMN "ND_AUTODEPLOY_USER"."AUTODEPLOY_LOG"."UNDO_OPERATION" IS 'information needed to undo';
-   COMMENT ON COLUMN "ND_AUTODEPLOY_USER"."AUTODEPLOY_LOG"."USERNAME" IS 'who did it';
-   
+   comment on column nd_dba_util_admin.audit_log.authorization  is 'RFC Number';
+   comment on column nd_dba_util_admin.audit_log.activity_date  is 'date/time of deployment';
+   comment on column nd_dba_util_admin.audit_log.username       is 'who did it';
+   comment on column nd_dba_util_admin.audit_log.sequence_nbr   is 'keep operations in order';
+   comment on column nd_dba_util_admin.audit_log.sql_cmd        is 'code that was executed';
+   comment on column nd_dba_util_admin.audit_log.undo_cmd       is 'information needed to undo';
