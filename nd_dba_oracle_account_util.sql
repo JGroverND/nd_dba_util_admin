@@ -27,6 +27,8 @@ IS
 -- C U R S O R S
 
 -- V A R I A B L E S
+   v_authorization            nd_dba_util_admin.audit_log.authorization%type := 'none';
+   v_sequence_nbr             nd_dba_util_admin.audit_log.sequence_nbr%type  := 0;
 
 -- F U N C T I O N S
    function is_account                 (p_account in sys.dba_users.username%type) return boolean;
