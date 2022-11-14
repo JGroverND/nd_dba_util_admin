@@ -129,9 +129,9 @@ create table nd_dba_util_admin.audit_log
 ) 
 tablespace users ;
 
-   comment on column nd_dba_util_admin.audit_log.authorization  is 'RFC Number';
-   comment on column nd_dba_util_admin.audit_log.activity_date  is 'date/time of deployment';
-   comment on column nd_dba_util_admin.audit_log.username       is 'who did it';
-   comment on column nd_dba_util_admin.audit_log.sequence_nbr   is 'keep operations in order';
-   comment on column nd_dba_util_admin.audit_log.sql_cmd        is 'code that was executed';
-   comment on column nd_dba_util_admin.audit_log.undo_cmd       is 'information needed to undo';
+comment on column nd_dba_util_admin.audit_log.authorization  is 'RFC Number';
+comment on column nd_dba_util_admin.audit_log.activity_date  is 'date/time of deployment';
+comment on column nd_dba_util_admin.audit_log.username       is 'who did it';
+comment on column nd_dba_util_admin.audit_log.sequence_nbr   is 'keep operations in order';
+comment on column nd_dba_util_admin.audit_log.sql_cmd        is 'code that was executed';
+comment on column nd_dba_util_admin.audit_log.undo_cmd       is 'information needed to undo';
