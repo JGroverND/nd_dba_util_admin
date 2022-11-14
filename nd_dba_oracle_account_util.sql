@@ -88,6 +88,8 @@ IS
                                           ,p_object_name in sys.dba_objects.object_name%type
                                           ,p_object_privilege in sys.dba_tab_privs.privilege%type);
 -- ora_acct_clone_acct(acct, clone)
+   procedure ora_role_rename           (p_old_role in sys.dba_roles.role%type,
+                                        P_new_role in sys.dba_roles.role%type);
 -- -----------------------------------------------------------------------------
 --                                                   E N D   O F   P A C K A G E
 -- -----------------------------------------------------------------------------

@@ -895,17 +895,17 @@ procedure ora_role_rename (p_old_role in sys.dba_roles.role%type,
 
   cursor priv_cursor is 
   select 'create role ' || upper(p_new_role) sqlcmd
-    from DUAL
+    from dual
   union
   select 'grant ' || granted_role || ' to ' || upper(p_new_role) || decode(admin_option, 'YES', ' with admin option' ,'')
     from dba_role_privs
    where grantee = upper(p_old_role)
   union
-  select 'grant ' || PRIVILEGE || ' to ' || upper(p_new_role) || decode(admin_option, 'YES', ' with admin option' ,'')
+  select 'grant ' || privilege || ' to ' || upper(p_new_role) || decode(admin_option, 'YES', ' with admin option' ,'')
     from dba_sys_privs
    where grantee = upper(p_old_role)
   union
-  select 'grant ' || PRIVILEGE || ' on ' || owner || '.' || table_name || ' to '  || upper(p_new_role) || decode(grantable, 'YES', ' with grant option', '')
+  select 'grant ' || privilege || ' on ' || owner || '.' || table_name || ' to '  || upper(p_new_role) || decode(grantable, 'YES', ' with grant option', '')
     from dba_tab_privs
    where grantee = upper(p_old_role)
   union
@@ -945,8 +945,10 @@ begin
     loop
       --dbms_output.put_line (my_cursor_rec.sqlcmd);
       execute immediate my_cursor_rec.sqlcmd ;
-    end loop;  
+    end loop;
+
 end ora_role_rename;
+-- -----------------------------------------------------------------------------
 
 -- -----------------------------------------------------------------------------
 --                                                   E N D   O F   P A C K A G E
