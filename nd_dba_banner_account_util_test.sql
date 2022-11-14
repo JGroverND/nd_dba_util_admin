@@ -1,6 +1,6 @@
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_banner_account_util_test.sql
--- desc: test suite for nd_dba_oracle_account_util
+-- desc: test suite for nd_dba_banner_account_util
 --
 -- audit trail
 -- 15-Oct-2022 John W Grover
