@@ -1,4 +1,4 @@
-create or replace PACKAGE nd_db_util_admin.nd_dba_banner_account_util
+create or replace PACKAGE                                                                                                                                                                                                       nd_dba_banner_account_util
 AS
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_banner_account_util.sql
@@ -30,6 +30,7 @@ AS
     --
     -- Account type functions
     --
+  --  function is_account                 (p_netid in dba_users.username%type) return boolean;
     function is_person_acct             (p_netid in dba_users.username%type) return boolean;
     function is_sys_acct                (p_netid in dba_users.username%type) return boolean;
     function is_owner_acct              (p_netid in dba_users.username%type) return boolean;
@@ -53,8 +54,8 @@ AS
     function ban_netid_has_banjsproxy   (p_netid in sys.proxy_users.client%type)                return boolean;
     function ban_acct_has_class         (p_netid in bansecr.gurucls.gurucls_userid%type, 
                                          p_class in bansecr.gurucls.gurucls_class_code%type) return boolean;
-    function ban_acct_has_fundorg       (p_netid in fimsmgr.fomprof.fomprof_username%type)      return boolean;
-    function ban_acct_has_hrfundorg     (p_netid in posnctl.nsrspsc.nsrspsc_user_code%type)     return boolean;
+--  function ban_acct_has_fundorg       (p_netid in fimsmgr.fomprof.fomprof_username%type)      return boolean;
+--  function ban_acct_has_hrfundorg     (p_netid in posnctl.nsrspsc.nsrspsc_user_code%type)     return boolean;
     function ban_acct_used_object       (p_netid  in bansecr.guraces.guraces_user_id%type,
                                          p_object in bansecr.guraces.guraces_object%type)       return boolean;
     function ban_user_orgn_code         (p_netid in sys.dba_users.username%type)                return fimsmgr.ftvorgn.ftvorgn_orgn_code%type;
@@ -63,18 +64,19 @@ AS
 -- P R O C E D U R E S
     procedure ban_acct_grant_banproxy   (p_netid in sys.proxy_users.client%type);
     procedure ban_acct_grant_banjsproxy (p_netid in sys.proxy_users.client%type);
---  procedure ban_acct_grant_class      (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type);
---  procedure ban_acct_grant_class_list (p_netid IN dba_users.username%type, p_class_list in varchar2);
---  procedure ban_acct_create_gobeacc   (p_netid IN dba_users.username%type);
+    procedure ban_acct_grant_class      (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type);
+    procedure ban_acct_grant_class_list (p_netid IN dba_users.username%type, p_class_list in varchar2);
+    procedure ban_acct_create_gobeacc   (p_netid IN dba_users.username%type);
 
--- Create accounts by type
---  procedure ban_acct_create_admin_pages   (acct)
+--  procedure ban_acct_create           (acct, type)
+    procedure ban_acct_create_admin_pages   (p_netid IN dba_users.username%type,p_class_list in varchar2);
     procedure ban_acct_create_buynd     (p_netid  IN sys.dba_users.username%type);
-    procedure ban_acct_create_eprint    (p_netid  IN sys.dba_users.username%type, p_class_list in varchar2);
-
--- Remove accounts and privileges
---  procedure ban_acct_remove           (acct)
---  procedure ban_acct_revoke_class     (acct, class)
+    procedure ban_acct_create_eprint    (p_netid  IN sys.dba_users.username%type,p_class_list in varchar2);
+    procedure ban_acct_remove           (p_netid IN dba_users.username%type);
+    procedure ban_acct_revoke_class (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type);
+    procedure ban_acct_revoke_all_classes(p_netid IN dba_users.username%type);
+    procedure ban_acct_revoke_class_list(p_netid IN dba_users.username%type, p_class_list in varchar2);
+    procedure ban_acct_remove_gobeacc(p_netid IN dba_users.username%TYPE);
 --  procedure ban_acct_remove_fundorg   (acct)
 --  procedure ban_acct_remove_hrfundorg (acct)
 --  procedure ban_acct_remove_gobeacc   (acct)
