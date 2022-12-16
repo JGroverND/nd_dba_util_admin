@@ -1,5 +1,4 @@
 create or replace package body nd_dba_util_admin.nd_dba_banner_account_util as
-
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_banner_account_util.sql
 -- desc: 
@@ -451,7 +450,7 @@ end ban_acct_used_object;
 -- -----------------------------------------------------------------------------
 
 function ban_user_orgn_code(p_netid in sys.dba_users.username%type) return fimsmgr.ftvorgn.ftvorgn_orgn_code%type is
-    v_orgn_code fimsmgr.ftvorgn.ftvorgn_orgn_code%type := "";
+    v_orgn_code fimsmgr.ftvorgn.ftvorgn_orgn_code%type := 'XXXXXX';
 begin
     if ban_acct_exists(p_netid) then
         select ftvorgn_orgn_code into v_orgn_code
@@ -736,8 +735,7 @@ end ban_acct_create_gobeacc;
 --------------------------------------------------------------------------------
 --  procedure ban_acct_create_inb_user (acct, type)
 --------------------------------------------------------------------------------
---  procedure ban_acct_create_admin_pages   (acct)
--- -----------------------------------------------------------------------------
+
 procedure ban_acct_create_admin_pages (p_netid IN dba_users.username%type) is
     p_count number := 0;
 begin
@@ -750,7 +748,6 @@ begin
 
         ban_acct_grant_banproxy(p_netid);
         ban_acct_grant_banjsproxy(p_netid);
-        ban_acct_grant_class_list(p_netid, p_class_list);
         ban_acct_create_gobeacc(p_netid);
         nd_dba_oracle_account_util.ora_acct_grant_role_list(p_netid, 'ND_CONNECT_S_ROLE,BAN_DEFAULT_Q,BAN_DEFAULT_M,BAN_DEFAULT_CONNECT');
         nd_dba_oracle_account_util.ora_acct_change_profile(p_netid, 'nd_usr_open_inbuser');
@@ -883,7 +880,7 @@ begin
                 || '''' ;
 
         sql_undo := 'ban_acct_grant_class(''' || p_netid || ''',''' || p_class;
-        execute immediate sql_cmd
+        execute immediate sql_cmd;
     end if;
 
     exception
@@ -901,9 +898,9 @@ procedure ban_acct_revoke_class_list(p_netid IN dba_users.username%type,
                                      p_class_list in varchar2) is
 
   cursor c1 is
-    select regexp_substr(v_classes, '[^,]+', 1, level) class_name
+    select regexp_substr(p_class_list, '[^,]+', 1, level) class_name
       from dual
-   connect by regexp_substr(v_classes, '[^,]+', 1, level) is not null;
+   connect by regexp_substr(p_class_list, '[^,]+', 1, level) is not null;
   c1_rec c1%rowtype;
 begin
     open c1;
@@ -925,7 +922,7 @@ procedure ban_acct_revoke_all_classes(p_netid IN dba_users.username%type) is
   c1_rec c1%rowtype;
 begin
 
-    if ban_acct_exists(p_netid)
+    if ban_acct_exists(p_netid) then
         open c1;
         loop
             fetch c1 into c1_rec;
