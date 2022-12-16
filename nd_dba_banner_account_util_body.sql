@@ -1,4 +1,4 @@
-create or replace PACKAGE BODY                                                                                                                                                                        nd_dba_banner_account_util as
+create or replace package body nd_dba_util_admin.nd_dba_banner_account_util as
 
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_banner_account_util.sql
@@ -7,7 +7,9 @@ create or replace PACKAGE BODY                                                  
 -- audit trail
 -- 17-Jun-2022 John W Grover
 --  - Original Code
---
+-- 16-dec-2022 John W Grover
+--  - added netid_has_spriden
+--  - formatting and standardization
 -- -----------------------------------------------------------------------------
 -- -----------------------------------------------------------------------------
 -- F U N C T I O N S
@@ -19,13 +21,13 @@ function is_person_acct (p_netid in dba_users.username%type) return boolean is
 -- person account defined as having a spriden row with ntype_code of 'NI'
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)then
-    
-    select count(spriden_id) into p_count
-      from saturn.spriden
-     where spriden_id = upper(p_netid)
-       and spriden_ntyp_code = 'NI';
+    if ban_acct_exists(p_netid) then
+        select count(spriden_id) into p_count
+        from saturn.spriden
+        where spriden_id = upper(p_netid)
+        and spriden_ntyp_code = 'NI';
      end if;
+
     if p_count > 0 then
         return true;
     else
@@ -39,20 +41,19 @@ function is_sys_acct (p_netid in dba_users.username%type) return boolean is
 -- system account sefined as being oracle maintained in dba_users
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
       select count(username) into p_count
       from dba_users
      where username = upper(p_netid)
        and oracle_maintained = 'Y';
     end if;
+
     if p_count > 0 then
         return true;
     else
         return false;
     end if;
 
-    
 end is_sys_acct;
 -- -----------------------------------------------------------------------------
 
@@ -61,13 +62,11 @@ function is_owner_acct (p_netid in dba_users.username%type) return boolean is
 --  note: may need to refine by excluding certain object types
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
-        
-    select count(owner) into p_count
-      from sys.dba_objects
-     where owner = upper(p_netid)
-     order by owner;
+    if ban_acct_exists(p_netid) then
+        select count(owner) into p_count
+        from sys.dba_objects
+        where owner = upper(p_netid)
+        order by owner;
      end if;
 
     if p_count > 0 then
@@ -76,7 +75,6 @@ begin
         return false;
     end if;
 
-    
 end is_owner_acct;
 -- -----------------------------------------------------------------------------
 
@@ -85,8 +83,7 @@ function is_link_acct (p_netid in dba_users.username%type) return boolean is
 --    it's circular, but the best we can do
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
       select count(username) into p_count
       from dba_users
      where username = upper(p_netid)
@@ -107,8 +104,7 @@ function is_qa_acct (p_netid in dba_users.username%type) return boolean is
 -- qa account defined by username naming convention
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
       select count(0) into p_count
       from dual
      where upper(p_netid) like 'ESQA%'
@@ -116,6 +112,7 @@ begin
         or upper(p_netid) like 'PSTRN%'
         or upper(p_netid) like 'PSUSER%';
     end if;
+
     if p_count > 0 then
         return true;
     else
@@ -129,8 +126,7 @@ function is_banner_baseline_acct (p_netid in dba_users.username%type) return boo
 -- banner basline accounts defined by being in a manually managed list of acounts
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
       select count(0) into p_count
       from dual
      where upper(p_netid) in (
@@ -157,8 +153,7 @@ begin
 'XRISMGR',   'XRISPRD',      'XRISUSR', 'UPGRADE2', 'UPGRADE3',   'UPGRADE4',   'UPGRADE5',    
 'BAN_ETHOS_BULK','BANGUIDGEN','BANINST1_SS9','JASPERSERVER','ODSSTG','ORDS_USER','WFBANNER','WFSSO','WORKFLOW',
 'BAN_EXTENSIONS','WFOBJECTS','NLSUSER','INTRCONFIG');
-
-end if;
+    end if;
 
     if p_count > 0 then
         return true;
@@ -174,15 +169,13 @@ function is_poweruser_acct (p_netid in dba_users.username%type) return boolean i
 --   note: this may need to be refined to a specific list of roles
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
      select count(grantee) into p_count
       from dba_role_privs
       join saturn.spriden on ((spriden_id = grantee) and (spriden_ntyp_code = 'NI'))
      where grantee = upper(p_netid)
        and granted_role like 'ND%'
        and granted_role not in ('ND_CONNECT_S_ROLE', 'ND_RESOURCE_S_ROLE');
-
     end if;
     
     if p_count > 0 then
@@ -199,8 +192,7 @@ function is_banner_user_acct (p_netid in dba_users.username%type) return boolean
 --   note: some cleanup required to make this entirely valid.
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
       select count(gurucls_userid) into p_count
       from bansecr.gurucls
      where gurucls_userid = upper(p_netid)
@@ -220,8 +212,7 @@ function is_eprint_acct (p_netid in dba_users.username%type) return boolean is
 -- eprint accounts defined as being granted any eprint class
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
+    if ban_acct_exists(p_netid) then
       select count(gurucls_userid) into p_count
       from bansecr.gurucls
      where gurucls_userid = upper(p_netid)
@@ -233,6 +224,7 @@ begin
     else
         return false;
     end if;
+
   end is_eprint_acct;
 -- -----------------------------------------------------------------------------
 
@@ -240,15 +232,11 @@ function is_buynd_acct (p_netid in dba_users.username%type) return boolean is
 -- buynd account defined as being granted the GGN_ALL_BUY_ND_ONLY_C class
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    
-    then
-    
-    select count(gurucls_userid) into p_count
-      from bansecr.gurucls
-     where gurucls_userid = upper(p_netid)
-       and gurucls_class_code = 'GGN_ALL_BUY_ND_ONLY_C';
-       
+    if ban_acct_exists(p_netid) then
+        select count(gurucls_userid) into p_count
+        from bansecr.gurucls
+        where gurucls_userid = upper(p_netid)
+        and gurucls_class_code = 'GGN_ALL_BUY_ND_ONLY_C';
     end if;
 
     if p_count > 0 then
@@ -264,13 +252,10 @@ function is_fin_fundorg_acct (p_netid in dba_users.username%type) return boolean
 -- fin fundorg account defined as having a fomprof row
     p_count number := 0;
 begin
-    if  ban_acct_exists(p_netid)
-    then
-     
-    select count(fobprof_user_id) into p_count
-      from fimsmgr.fobprof
-     where fobprof_user_id = upper(p_netid);
-    
+    if ban_acct_exists(p_netid) then
+        select count(fobprof_user_id) into p_count
+        from fimsmgr.fobprof
+        where fobprof_user_id = upper(p_netid);
     end if;
 
     if p_count > 0 then
@@ -279,7 +264,6 @@ begin
         return false;
     end if;
 
-    
 end is_fin_fundorg_acct;
 -- -----------------------------------------------------------------------------
 
@@ -287,14 +271,11 @@ function is_hr_fundorg_acct (p_netid in dba_users.username%type) return boolean 
 -- hr fundorg account defined as having a nsrspsc row
     p_count number := 0;
 begin
-    if not ban_acct_exists(p_netid)
-    then
-        raise e_invalid_account;
+    if ban_acct_exists(p_netid) then
+        select count(nsrspsc_user_code) into p_count 
+          from posnctl.nsrspsc
+         where nsrspsc_user_code = upper(p_netid);
     end if;
-
-    select count(nsrspsc_user_code) into p_count 
-      from posnctl.nsrspsc
-     where nsrspsc_user_code = upper(p_netid);
 
     if p_count > 0 then
         return true;
@@ -302,13 +283,25 @@ begin
         return false;
     end if;
 
-    exception
-    when e_invalid_account
-    then
-        raise_application_error(-20002, 'Account does not exist');
-
 end is_hr_fundorg_acct;
 -- -----------------------------------------------------------------------------
+
+function netid_has_spriden (p_netid in dba_users.username%type) return boolean is
+-- person account defined as having a spriden row with ntype_code of 'NI'
+-- sometimes we need to check for a person before an account is created
+    p_count number := 0;
+begin
+    select count(spriden_id) into p_count
+      from saturn.spriden
+     where spriden_id = upper(p_netid)
+       and spriden_ntyp_code = 'NI';
+
+    if p_count > 0 then
+        return true;
+    else
+        return false;
+    end if;
+end netid_has_spriden;
 
 --
 -- Banner specific functions
@@ -342,9 +335,11 @@ end ban_class_exists;
 function ban_netid_has_gobeacc (p_netid in general.gobeacc.gobeacc_username%type) return boolean is
     p_count number :=0;
 begin
-    select count(0) into p_count 
-      from general.gobeacc 
-     where upper(gobeacc_username) = upper(p_netid);
+    if ban_acct_exists(p_netid) then
+        select count(0) into p_count 
+        from general.gobeacc 
+        where upper(gobeacc_username) = upper(p_netid);
+    end if;
 
     if p_count > 0 then
         return true;
@@ -358,26 +353,31 @@ end ban_netid_has_gobeacc;
 function ban_netid_has_banproxy(p_netid in sys.proxy_users.client%type) return boolean is
     p_count number :=0;
 begin
-    select count(0) into p_count 
-      from sys.proxy_users 
-     where upper(client) = upper(p_netid)
-       and proxy = 'BANPROXY';
+    if ban_acct_exists(p_netid) then
+        select count(0) into p_count 
+        from sys.proxy_users 
+        where upper(client) = upper(p_netid)
+        and proxy = 'BANPROXY';
+    end if;
 
     if p_count > 0 then
         return true;
     else
         return false;
     end if;
+
 end ban_netid_has_banproxy;
 -- -----------------------------------------------------------------------------
 
 function ban_netid_has_banjsproxy(p_netid in sys.proxy_users.client%type) return boolean is
     p_count number :=0;
 begin
-    select count(0) into p_count 
-      from sys.proxy_users 
-     where upper(client) = upper(p_netid)
-       and proxy = 'BANJSPROXY';
+    if ban_acct_exists(p_netid) then
+        select count(0) into p_count 
+        from sys.proxy_users 
+        where upper(client) = upper(p_netid)
+        and proxy = 'BANJSPROXY';
+    end if;
 
     if p_count > 0 then
         return true;
@@ -391,34 +391,19 @@ function ban_acct_has_class(p_netid in bansecr.gurucls.gurucls_userid%type,
                             p_class in bansecr.gurucls.gurucls_class_code%type) return boolean is
 p_count number :=0;
 begin
-    if not ban_acct_exists(p_netid)
-    then
-        raise e_invalid_account;
+    if  ban_acct_exists(p_netid)
+    and ban_class_exists(p_class) then
+        select count(0) into p_count
+        from bansecr.gurucls 
+        where upper(gurucls_userid) = upper(p_netid)
+        and upper(gurucls_class_code) = upper(p_class);
     end if;
-
-    if not ban_class_exists(p_class)
-    then
-        raise e_invalid_class;
-    end if;
-
-    select count(0) into p_count
-      from bansecr.gurucls 
-     where upper(gurucls_userid) = upper(p_netid)
-       and upper(gurucls_class_code) = upper(p_class);
 
     if p_count > 0 then
         return true;
     else
         return false;
     end if;
-
-    exception
-    when e_invalid_account
-    then
-        raise_application_error(-20002, 'Invalid account');
-    when e_invalid_class
-    then
-        raise_application_error(-20004, 'Invalid class');
 
 end ban_acct_has_class;
 -- -----------------------------------------------------------------------------
@@ -436,28 +421,25 @@ end ban_acct_has_fundorg;
 
 function ban_acct_has_hrfundorg(p_netid in posnctl.nsrspsc.nsrspsc_user_code%type) return boolean is
 -- kind of redundant, but created for naming compatibility
-    begin
-        if is_hr_fundorg_acct(p_netid) then
-            return true;
-        else
-            return false;
-        end if;
+begin
+    if is_hr_fundorg_acct(p_netid) then
+        return true;
+    else
+        return false;
+    end if;
 end ban_acct_has_hrfundorg;
 -- -----------------------------------------------------------------------------
 
 function ban_acct_used_object(p_netid in bansecr.guraces.guraces_user_id%type,
-                                  p_object in bansecr.guraces.guraces_object%type) return boolean is
+                              p_object in bansecr.guraces.guraces_object%type) return boolean is
 p_count number :=0;
 begin
-    if not ban_acct_exists(p_netid)
-    then
-        raise e_invalid_account;
+    if ban_acct_exists(p_netid) then
+        select count(0) into p_count 
+          from bansecr.guraces 
+         where upper(guraces_user_id) = upper(p_netid)
+           and upper(guraces_object) = upper(p_object);
     end if;
-
-    select count(0) into p_count 
-        from bansecr.guraces 
-        where upper(guraces_user_id) = upper(p_netid)
-        and upper(guraces_object) = upper(p_object);
 
     if p_count > 0 then
         return true;
@@ -465,38 +447,25 @@ begin
         return false;
     end if;
 
-    exception
-    when e_invalid_account
-    then
-        raise_application_error(-20002, 'Account does not exist');
-
 end ban_acct_used_object;
 -- -----------------------------------------------------------------------------
 
 function ban_user_orgn_code(p_netid in sys.dba_users.username%type) return fimsmgr.ftvorgn.ftvorgn_orgn_code%type is
-    v_orgn_code fimsmgr.ftvorgn.ftvorgn_orgn_code%type;
+    v_orgn_code fimsmgr.ftvorgn.ftvorgn_orgn_code%type := "";
 begin
-    if not ban_acct_exists(p_netid)
-    then
-        raise e_invalid_account;
+    if ban_acct_exists(p_netid) then
+        select ftvorgn_orgn_code into v_orgn_code
+        from saturn.spriden
+        join payroll.pebempl on  pebempl_pidm = spriden_pidm
+        join fimsmgr.ftvorgn on ftvorgn_coas_code = pebempl_coas_code_home
+                            and ftvorgn_orgn_code = pebempl_orgn_code_home
+                            and ftvorgn_eff_date <= SYSDATE
+                            and ftvorgn_nchg_date > SYSDATE
+        where spriden_id = upper(p_netid)
+        and spriden_ntyp_code = 'NI';
     end if;
 
-    select ftvorgn_orgn_code into v_orgn_code
-      from saturn.spriden
-      join payroll.pebempl on  pebempl_pidm = spriden_pidm
-      join fimsmgr.ftvorgn on ftvorgn_coas_code = pebempl_coas_code_home
-                          and ftvorgn_orgn_code = pebempl_orgn_code_home
-                          and ftvorgn_eff_date <= SYSDATE
-                          and ftvorgn_nchg_date > SYSDATE
-     where spriden_id = upper(p_netid)
-       and spriden_ntyp_code = 'NI';
-
     return v_orgn_code;
-
-    exception
-    when e_invalid_account
-    then
-        raise_application_error(-20002, 'Account does not exist');
 
 end ban_user_orgn_code;
 -- -----------------------------------------------------------------------------
@@ -626,7 +595,6 @@ begin
     -- put all the pieces together
     return 'ND_' || v_account_prefix || '_' || v_account_state || '_' || v_account_type;
 
-
     exception
     when e_invalid_account
     then
@@ -638,43 +606,40 @@ end ban_acct_suggest_profile;
 -- P R O C E D U R E S
 -- -----------------------------------------------------------------------------
 
-procedure ban_acct_grant_banproxy(p_netid in sys.proxy_users.client%type) IS
-p_count number := 0;
-
-BEGIN
-
-if not ban_netid_has_banproxy(p_netid)
-
-THEN
-
- execute immediate '   ALTER USER ' ||p_netid|| ' grant connect through banproxy';
-
-end if;
+procedure ban_acct_grant_banproxy(p_netid in sys.proxy_users.client%type) is
+    p_count  number := 0;
+    sql_cmd  varchar(1000) := '';
+    sql_undo varchar(1000) := '';
+begin
+    if not ban_netid_has_banproxy(p_netid) then
+        sql_cmd  := 'alter user ' ||p_netid|| ' grant connect through banproxy';
+        sql_undo := 'alter user ' ||p_netid|| ' revoke connect through banproxy';
+        execute immediate sql_cmd;
+    end if;
 
 end ban_acct_grant_banproxy;
 --------------------------------------------------------------------------------
 
-procedure ban_acct_grant_banjsproxy(p_netid in sys.proxy_users.client%type) IS
-
-p_count number := 0;
-
-BEGIN
-
-if not ban_netid_has_banjsproxy(p_netid)
-
-THEN
-
-  execute immediate '   ALTER USER ' ||p_netid|| '  grant connect through banjsproxy '; 
-
-end if;
+procedure ban_acct_grant_banjsproxy(p_netid in sys.proxy_users.client%type) is
+    p_count number := 0;
+    sql_cmd  varchar(1000) := '';
+    sql_undo varchar(1000) := '';
+begin
+    if not ban_netid_has_banjsproxy(p_netid) then
+        sql_cmd  := 'alter user ' ||p_netid|| ' grant connect through banjsproxy';
+        sql_undo := 'alter user ' ||p_netid|| ' revoke connect through banjsproxy';
+        execute immediate sql_cmd;
+    end if;
 
 end ban_acct_grant_banjsproxy;
 -- -----------------------------------------------------------------------------
 --procedure that grant list of classes to Banner account
 --------------------------------------------------------------------------------
 
-procedure ban_acct_grant_class  (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type) IS
-
+procedure ban_acct_grant_class (p_netid IN dba_users.username%type, 
+                                p_class in bansecr.gtvclas.gtvclas_class_code%type) is
+    sql_cmd  varchar(1000) := '';
+    sql_undo varchar(1000) := '';
 begin
     if not ban_acct_exists(p_netid)
     then
@@ -686,11 +651,18 @@ begin
         raise e_invalid_class;
     end if;
 
-execute immediate 'insert into  bansecr.gurucls  (GURUCLS_USERID,GURUCLS_CLASS_CODE,GURUCLS_ACTIVITY_DATE)  values ('''
-                        || upper(p_netid)
-                        || ''', '''
-                        || upper(p_class) 
-                        || ''', sysdate) ';
+    sql_cmd := 'insert into bansecr.gurucls (GURUCLS_USERID,GURUCLS_CLASS_CODE,GURUCLS_ACTIVITY_DATE) '
+            || 'values ('''
+            || upper(p_netid)
+            || ''', '''
+            || upper(p_class) 
+            || ''', sysdate)';
+    sql_undo := 'delete from bansecr.gurucls where gurucls_userid = '''
+            || upper(p_netid)
+            || ''' and gurucls_class_code = '''
+            || upper(p_class);
+
+    execute immediate sql_cmd;
 
 exception
     when e_invalid_account then
@@ -700,185 +672,143 @@ exception
     when e_class_already_assigned then
         raise_application_error(-20008, 'class already assigned');
 
-
 end ban_acct_grant_class;
 --------------------------------------------------------------------------------
 --procedure that list classes that need to be granted to an account
 --------------------------------------------------------------------------------
 
-procedure ban_acct_grant_class_list (p_netid IN dba_users.username%type, p_class_list in varchar2) IS
-
-v_classes varchar2(1000) := upper(p_class_list);
-
-  cursor c1 is
+procedure ban_acct_grant_class_list (p_netid IN dba_users.username%type, 
+                                     p_class_list in varchar2) is
+    v_classes varchar2(1000) := upper(p_class_list);
+    cursor c1 is
     select regexp_substr(v_classes, '[^,]+', 1, level) class_name
-      from dual
-   connect by regexp_substr(v_classes, '[^,]+', 1, level) is not null;
-
-  c1_rec c1%rowtype;
-
+        from dual
+    connect by regexp_substr(v_classes, '[^,]+', 1, level) is not null;
+    c1_rec c1%rowtype;
 begin
-  open c1;
-  loop
-    fetch c1 into c1_rec;
-    exit when c1%notfound;
-    ban_acct_grant_class(p_netid, c1_rec.class_name);
-  end loop;
-  close c1;
+    open c1;
+    loop
+        fetch c1 into c1_rec;
+        exit when c1%notfound;
+        ban_acct_grant_class(p_netid, c1_rec.class_name);
+    end loop;
+    close c1;
 
 end ban_acct_grant_class_list;
 --------------------------------------------------------------------------------
 -- procedure that grants gobeacc to an account
 --------------------------------------------------------------------------------
+
 procedure ban_acct_create_gobeacc(p_netid IN dba_users.username%TYPE) is
+    spriden_pidm  number;
+    spriden_id varchar2(100);
+    p_count number := 0;
+    sql_cmd  varchar(1000) := '';
+    sql_undo varchar(1000) := '';
+begin
+    if not ban_acct_exists(p_netid)
+    then
+        raise e_invalid_account;
+    end if;
 
-spriden_pidm  number;
-spriden_id varchar2(100);
+    if not ban_netid_has_gobeacc(p_netid) then
+        select ' insert into general.gobeacc (GOBEACC_PIDM, GOBEACC_USERNAME, GOBEACC_USER_ID, GOBEACC_ACTIVITY_DATE) '
+            || 'values ('
+            || spriden_pidm
+            || ', '''
+            || spriden_id
+            || ''', '''
+            || user
+            || ''', sysdate)' into sql_cmd
+        from saturn.spriden
+        where spriden_id = UPPER (p_netid);
 
-p_count number := 0;
-sqlcmd varchar2(300);
-
-BEGIN
-
-if not ban_acct_exists(p_netid)
-then
-    raise e_invalid_account;
-end if;
-
-if not ban_netid_has_gobeacc(p_netid)
-
-then
-
-SELECT  ' insert into general.gobeacc (GOBEACC_PIDM, GOBEACC_USERNAME, GOBEACC_USER_ID, GOBEACC_ACTIVITY_DATE) values ('
-       || spriden_pidm
-       || ', '''
-       || spriden_id
-       || ''', '''
-       || user
-       || ''', sysdate)' into sqlcmd
-         FROM saturn.spriden
- WHERE spriden_id = UPPER (p_netid);
-
-execute immediate sqlcmd;
-
-end if;
+        execute immediate sql_cmd;
+    end if;
 
 exception
     when e_invalid_account then
         raise_application_error(-20001, 'Account does not exist' ||p_netid||'');
     when e_gobeacc_exists then
         raise_application_error(-20005, 'Account has gobeacc ' ||p_netid||'');
+
 end ban_acct_create_gobeacc;
-
-
 --------------------------------------------------------------------------------
-
---  procedure ban_acct_create           (acct, type)
+--  procedure ban_acct_create_inb_user (acct, type)
 --------------------------------------------------------------------------------
 --  procedure ban_acct_create_admin_pages   (acct)
 -- -----------------------------------------------------------------------------
-procedure ban_acct_create_admin_pages (p_netid IN dba_users.username%type, p_class_list in varchar2) is
-  p_count number := 0;
+procedure ban_acct_create_admin_pages (p_netid IN dba_users.username%type) is
+    p_count number := 0;
+begin
+    if not ban_acct_exists(p_netid) then
+        if netid_has_spriden(p_netid) then
+            nd_dba_oracle_account_util.ora_acct_create(p_netid);
+        else
+            raise e_invalid_account;
+        end if;
 
-BEGIN
+        ban_acct_grant_banproxy(p_netid);
+        ban_acct_grant_banjsproxy(p_netid);
+        ban_acct_grant_class_list(p_netid, p_class_list);
+        ban_acct_create_gobeacc(p_netid);
+        nd_dba_oracle_account_util.ora_acct_grant_role_list(p_netid, 'ND_CONNECT_S_ROLE,BAN_DEFAULT_Q,BAN_DEFAULT_M,BAN_DEFAULT_CONNECT');
+        nd_dba_oracle_account_util.ora_acct_change_profile(p_netid, 'nd_usr_open_inbuser');
+    end if;
 
-if not ban_acct_exists(p_netid)
-
-Then
-        nd_dba_oracle_account_util.ora_acct_create(upper(p_netid));
-
-else
-
-raise e_account_exists;
-
-end if;
-
-if  is_person_acct(p_netid)
-
-then
-         ban_acct_grant_banproxy(UPPER(p_netid));
-         ban_acct_grant_banjsproxy(upper(P_netid));
-         ban_acct_grant_class_list(upper(p_netid),p_class_list);
-         ban_acct_create_gobeacc(upper(p_netid));
-         nd_dba_oracle_account_util.ora_acct_grant_role_list(upper(p_netid), 'ND_CONNECT_S_ROLE,BAN_DEFAULT_Q,BAN_DEFAULT_M,BAN_DEFAULT_CONNECT');
-         nd_dba_oracle_account_util.ora_acct_change_profile(upper(p_netid), 'nd_usr_open_inbuser');
-else
-
-    raise e_invalid_account;
-
-end if;
-
-  exception
-
-when e_account_exists then
-        raise_application_error(-20001, 'Account already exist');  
-
+exception
+    when e_account_exists then
+        raise_application_error(-20001, 'Account already exist');
+    when e_invalid_account then
+        raise_application_error(-20002, 'Invalid account');
 
 end ban_acct_create_admin_pages;
-
 --------------------------------------------------------------------------------
 -- procedure to create inb sreg user
 --------------------------------------------------------------------------------
-procedure ban_acct_create_inb_sreg_user (p_netid IN dba_users.username%type, p_class_list in varchar2) is
-  p_count number := 0;
 
-BEGIN
+procedure ban_acct_create_inb_sreg_user (p_netid IN dba_users.username%type, 
+                                         p_class_list in varchar2) is
+    p_count number := 0;
+begin
+    if not ban_acct_exists(p_netid) then
+        if netid_has_spriden(p_netid) then
+            ban_acct_create_admin_pages(p_netid);
+            ban_acct_grant_class_list(p_netid,p_class_list);
+        else
+            raise e_invalid_account;
+        end if;
+    end if;
 
-if not ban_acct_exists(p_netid)
-
-Then
-        nd_dba_oracle_account_util.ora_acct_create(upper(p_netid));
-
-else
-
-raise e_account_exists;
-
-end if;
-
-if  is_person_acct(p_netid)
-
-then
-         ban_acct_grant_banproxy(UPPER(p_netid));
-         ban_acct_grant_banjsproxy(upper(P_netid));
-         ban_acct_grant_class_list(upper(p_netid),p_class_list);
-         ban_acct_create_gobeacc(upper(p_netid));
-         nd_dba_oracle_account_util.ora_acct_grant_role_list(upper(p_netid), 'ND_CONNECT_S_ROLE,BAN_DEFAULT_Q,BAN_DEFAULT_M,BAN_DEFAULT_CONNECT');
-         nd_dba_oracle_account_util.ora_acct_change_profile(upper(p_netid), 'nd_usr_open_inbuser');
-else
-
-    raise e_invalid_account;
-
-end if;
-
-  exception
-
-when e_account_exists then
-        raise_application_error(-20001, 'Account already exist');  
-
+exception
+    when e_account_exists then
+        raise_application_error(-20001, 'Account already exist');
+    when e_invalid_account then
+        raise_application_error(-20002, 'Invalid account');
 
 end ban_acct_create_inb_sreg_user;
 
 --------------------------------------------------------------------------------
 --procedure create BuyND account
 --------------------------------------------------------------------------------
-procedure ban_acct_create_buynd(p_netid  IN sys.dba_users.username%type) is
+procedure ban_acct_create_buynd(p_netid in sys.dba_users.username%type) is
     p_count number := 0;
 begin
 
-    if not ban_class_exists('GGN_ALL_BUY_ND_ONLY_C')
-    then
-        select 1 into p_count from dual;
+    if not ban_class_exists('GGN_ALL_BUY_ND_ONLY_C') then
+        raise e_invalid_class;
     end if;
 
-    if not ban_acct_exists(p_netid)
-    then
-        nd_dba_oracle_account_util.ora_acct_create(upper(p_netid));
+    if not ban_acct_exists(p_netid) then
+        if netid_has_spriden(p_netid) then
+            ban_acct_create_admin_pages(p_netid);
+        else
+            raise e_invalid_account;
+        end if;
     end if;
 
-    if not ban_acct_has_class(upper(p_netid), 'GGN_ALL_BUY_ND_ONLY_C')
-    then
-        INSERT into bansecr.gurucls (GURUCLS_USERID,GURUCLS_CLASS_CODE,GURUCLS_ACTIVITY_DATE)  
-         values (upper(p_netid), 'GGN_ALL_BUY_ND_ONLY_C', SYSDATE );
+    if not ban_acct_has_class(p_netid, 'GGN_ALL_BUY_ND_ONLY_C') then
+        ban_acct_grant_class(p_netid, 'GGN_ALL_BUY_ND_ONLY_C');
     end if;
 
     -- check the account profile and update is needed
@@ -886,104 +816,74 @@ begin
 end ban_acct_create_buynd;
 -- -----------------------------------------------------------------------------
 
-procedure ban_acct_create_eprint(p_netid  IN sys.dba_users.username%type,p_class_list in varchar2) is
+procedure ban_acct_create_eprint(p_netid  IN sys.dba_users.username%type,
+                                 p_class_list in varchar2) is
+    p_count number := 0;
+begin
+    if not ban_acct_exists(p_netid) then
+        if netid_has_spriden(p_netid) then
+            ban_acct_create_admin_pages(p_netid);
+        else
+            raise e_invalid_account;
+        end if;
+    end if;
+    ban_acct_grant_class_list(upper(p_netid),p_class_list);
 
-p_count number := 0;
+    -- check the account profile and update is needed
 
-BEGIN
-
-if not ban_acct_exists(p_netid)
-
-Then
-        nd_dba_oracle_account_util.ora_acct_create(upper(p_netid));
-
-else
-
-raise e_account_exists;
-
-end if;
-
-if  is_person_acct(p_netid)
-
-then
-
-         ban_acct_grant_banproxy(UPPER(p_netid));
-         ban_acct_grant_banjsproxy(upper(P_netid));
-         ban_acct_grant_class_list(upper(p_netid),p_class_list);
-         ban_acct_create_gobeacc(upper(p_netid));
-         nd_dba_oracle_account_util.ora_acct_grant_role_list(upper(p_netid), 'ND_CONNECT_S_ROLE,BAN_DEFAULT_Q,BAN_DEFAULT_M,BAN_DEFAULT_CONNECT');
-         nd_dba_oracle_account_util.ora_acct_change_profile(upper(p_netid), 'ND_USR_OPEN_EPRINT');
-
-    else
-
-    raise e_invalid_account;
-
-end if;
-
-  exception
-
-when e_account_exists then
-        raise_application_error(-20001, 'Account already exist');  
+exception
+    when e_invalid_account then
+        raise_application_error(-20002, 'Invalid Account '||p_netid||'');  
 
 end ban_acct_create_eprint;
 -- -----------------------------------------------------------------------------
 -- procedure to remove Banner account, objects and grants.
 --------------------------------------------------------------------------------
 
-procedure ban_acct_remove           (p_netid IN dba_users.username%type) is
-
+procedure ban_acct_remove (p_netid IN dba_users.username%type) is
 begin
 
-if ban_acct_exists(p_netid)
-
-THEN
-
-    ban_acct_revoke_all_classes(upper(p_netid));
-    ban_acct_remove_gobeacc(upper(p_netid));
-    nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_drop(upper(p_netid));
-    ban_acct_remove_fundorg(upper(p_netid));
-    ban_acct_remove_hrfundorg (upper(p_netid));
-    
-else 
-
-   raise e_invalid_account;
-
-end if;
+    if ban_acct_exists(p_netid) then
+        ban_acct_revoke_all_classes(p_netid);
+        ban_acct_remove_gobeacc(p_netid);
+        nd_dba_util_admin.nd_dba_oracle_account_util.ora_acct_drop(p_netid);
+        ban_acct_remove_fundorg(p_netid);
+        ban_acct_remove_hrfundorg (p_netid);
+    else 
+        raise e_invalid_account;
+    end if;
 
 exception
-
-when e_invalid_account then
-        raise_application_error(-20002, 'Invalid Account'||p_netid||'');  
-
+    when e_invalid_account then
+            raise_application_error(-20002, 'Invalid Account '||p_netid||'');  
 
 end ban_acct_remove;
-
 
 --------------------------------------------------------------------------------
 -- procedure to revoke class/classes from a user
 --------------------------------------------------------------------------------
-procedure ban_acct_revoke_class (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type) IS
+procedure ban_acct_revoke_class (p_netid IN dba_users.username%type, 
+                                 p_class in bansecr.gtvclas.gtvclas_class_code%type) is
+    sql_cmd  varchar(1000) := '';
+    sql_undo varchar(1000) := '';
 begin
-    if not ban_acct_exists(p_netid)
-    then
+    if not ban_acct_exists(p_netid) then
         raise e_invalid_account;
     end if;
 
-    if not ban_class_exists(p_class)
-    then
+    if not ban_class_exists(p_class) then
         raise e_invalid_class;
     end if;
 
-    if ban_acct_has_class(p_netid, p_class)
+    if ban_acct_has_class(p_netid, p_class) then
+        sql_cmd := ' delete from bansecr.gurucls where gurucls_userid = ''' 
+                || upper(p_netid)
+                || ''' and gurucls_class_code = ''' 
+                || upper(p_class)
+                || '''' ;
 
-    then
-
- execute immediate ' delete from bansecr.gurucls where gurucls_userid = ''' 
-       || upper(p_netid)
-       || ''' and gurucls_class_code = ''' 
-       || upper(p_class)
-       || '''' ;
-
+        sql_undo := 'ban_acct_grant_class(''' || p_netid || ''',''' || p_class;
+        execute immediate sql_cmd
     end if;
 
     exception
@@ -993,43 +893,47 @@ begin
         raise_application_error(-20002, 'Class does not exist');
 
 end ban_acct_revoke_class;
+
 --------------------------------------------------------------------------------
 -- procedure that list class to revoke from user
 --------------------------------------------------------------------------------
-procedure ban_acct_revoke_class_list(p_netid IN dba_users.username%type, p_class_list in varchar2) is
-  v_classes varchar2(1000) := upper(p_class_list);
+procedure ban_acct_revoke_class_list(p_netid IN dba_users.username%type, 
+                                     p_class_list in varchar2) is
 
   cursor c1 is
     select regexp_substr(v_classes, '[^,]+', 1, level) class_name
       from dual
    connect by regexp_substr(v_classes, '[^,]+', 1, level) is not null;
-
   c1_rec c1%rowtype;
-
 begin
-  open c1;
-  loop
-    fetch c1 into c1_rec;
-    exit when c1%notfound;
-    ban_acct_revoke_class(p_netid, c1_rec.class_name);
-  end loop;
-  close c1;
+    open c1;
+    loop
+        fetch c1 into c1_rec;
+        exit when c1%notfound;
+        ban_acct_revoke_class(p_netid, c1_rec.class_name);
+    end loop;
+    close c1;
 
 end ban_acct_revoke_class_list;
+
 -------------------------------------------------------------------------------
 procedure ban_acct_revoke_all_classes(p_netid IN dba_users.username%type) is
-
-
+  cursor c1 is
+    select gurucls_class_code
+      from bansecr.gurucls
+     where gurucls_userid = p_netid;
+  c1_rec c1%rowtype;
 begin
 
-if ban_acct_exists(p_netid)
-
-then
-
-execute immediate 'delete from bansecr.gurucls where gurucls_userid = ''' 
-       || upper(p_netid)
-       || '''' ;
-end if;
+    if ban_acct_exists(p_netid)
+        open c1;
+        loop
+            fetch c1 into c1_rec;
+            exit when c1%notfound;
+            ban_acct_revoke_class(p_netid, c1_rec.gurucls_class_code);
+        end loop;
+        close c1;
+    end if;
 
 end ban_acct_revoke_all_classes;
 
@@ -1037,48 +941,38 @@ end ban_acct_revoke_all_classes;
 --  procedure ban_acct_remove_hrfundorg (acct)
 --------------------------------------------------------------------------------
 procedure ban_acct_remove_hrfundorg (p_netid in dba_users.username%type) is
-
 begin 
 
-if ban_acct_has_hrfundorg(p_netid)
-
-then
-
-execute immediate 'delete from posnctl.nsrspsc where nsrspsc_user_code = '''
-    || p_netid
-    || '''' ;
-    
-end if;
+    if ban_acct_has_hrfundorg(p_netid) then
+        execute immediate 'delete from posnctl.nsrspsc where nsrspsc_user_code = '''
+            || p_netid
+            || '''' ;
+    end if;
 
 end ban_acct_remove_hrfundorg;
 -------------------------------------------------------------------------------
 procedure ban_acct_remove_fundorg   (p_netid in dba_users.username%type) is
-
 begin
 
-if ban_acct_has_fundorg(p_netid)
+    if ban_acct_has_fundorg(p_netid) then
+        execute immediate 'delete from fimsmgr.fobprof where fobprof_user_id = '''
+            || p_netid
+            || '''' ;
 
-Then
+        execute immediate 'delete from fimsmgr.forusfn where forusfn_user_id_entered = '''
+            || p_netid
+            || '''' ;
+        execute immediate 'delete from fimsmgr.forusor where forusor_user_id_entered = '''
+            || p_netid
+            || '''' ;
+        execute immediate 'delete from ndfiadmin.fzbzfop where fzbzfop_net_id = '''
+            || p_netid
+            || '''' ;
 
-execute immediate 'delete from fimsmgr.fobprof where fobprof_user_id = '''
-    || p_netid
-    || '''' ;
-
-execute immediate 'delete from fimsmgr.forusfn where forusfn_user_id_entered = '''
-    || p_netid
-    || '''' ;
-execute immediate 'delete from fimsmgr.forusor where forusor_user_id_entered = '''
-    || p_netid
-    || '''' ;
-execute immediate 'delete from ndfiadmin.fzbzfop where fzbzfop_net_id = '''
-    || p_netid
-    || '''' ;
-
-execute immediate 'delete from ndfiadmin.zownfop where zownfop_net_id = '''
-    || p_netid
-    || '''' ;
-
-end if;
+        execute immediate 'delete from ndfiadmin.zownfop where zownfop_net_id = '''
+            || p_netid
+            || '''' ;
+    end if;
 
 end ban_acct_remove_fundorg;
 
@@ -1087,23 +981,15 @@ end ban_acct_remove_fundorg;
 --  procedure ban_acct_remove_gobeacc   (acct)
 --------------------------------------------------------------------------------
 procedure ban_acct_remove_gobeacc(p_netid IN dba_users.username%TYPE) is
-
-spriden_pidm number;
-spriden_id varchar2(20); 
-
-p_count number := 0;
-
-BEGIN
-
-if  ban_netid_has_gobeacc(p_netid)
-Then
-
-execute immediate ' delete from general.gobeacc where GOBEACC_USERNAME = '''
-        ||upper(p_netid)
-        ||'''';
-
-
-end if;
+    spriden_pidm number;
+    spriden_id varchar2(20); 
+    p_count number := 0;
+begin
+    if  ban_netid_has_gobeacc(p_netid) then
+        execute immediate 'delete from general.gobeacc where GOBEACC_USERNAME = '''
+                ||upper(p_netid)
+                ||'''';
+    end if;
 
 end ban_acct_remove_gobeacc;
 
@@ -1111,4 +997,4 @@ end ban_acct_remove_gobeacc;
 --  procedure ban_acct_clone_acct       (acct, clone)
 -- -----------------------------------------------------------------------------
 
-END nd_dba_banner_account_util;
+end nd_dba_banner_account_util;

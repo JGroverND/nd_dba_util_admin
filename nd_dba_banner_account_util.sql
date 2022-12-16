@@ -1,5 +1,4 @@
-create or replace PACKAGE                                                                                                                                                                                                                                                                               nd_dba_banner_account_util
-AS
+create or replace package nd_dba_util_admin.nd_dba_banner_account_util as
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_banner_account_util.sql
 -- desc: 
@@ -7,7 +6,8 @@ AS
 -- audit trail
 -- 17-Jun-2022 John W Grover
 --  - Original Code
---
+-- 16-dec-2022 John W Grover
+--  - added netid_has_spriden
 -- -----------------------------------------------------------------------------
 
     -- E X C E P T I O N S
@@ -44,6 +44,7 @@ AS
     function is_fin_fundorg_acct        (p_netid in dba_users.username%type) return boolean;
     function is_hr_fundorg_acct         (p_netid in dba_users.username%type) return boolean;
 
+    function netid_has_spriden          (p_netid in dba_users.username%type) return boolean;
     --
     -- Banner specific functions
     --
@@ -68,7 +69,7 @@ AS
     procedure ban_acct_grant_class_list (p_netid IN dba_users.username%type, p_class_list in varchar2);
     procedure ban_acct_create_gobeacc   (p_netid IN dba_users.username%type);
 
---  procedure ban_acct_create           (acct, type)
+--  procedure ban_acct_create_inb_user           (acct, type)
     procedure ban_acct_create_admin_pages   (p_netid IN dba_users.username%type,p_class_list in varchar2);
     procedure ban_acct_create_inb_sreg_user (p_netid IN dba_users.username%type,p_class_list in varchar2);
     procedure ban_acct_create_buynd         (p_netid  IN sys.dba_users.username%type);
