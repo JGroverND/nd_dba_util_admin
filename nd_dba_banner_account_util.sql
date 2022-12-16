@@ -1,4 +1,4 @@
-create or replace PACKAGE                                                                                                                                                                                                       nd_dba_banner_account_util
+create or replace PACKAGE                                                                                                                                                                                                                                                                               nd_dba_banner_account_util
 AS
 -- -----------------------------------------------------------------------------
 -- file: nd_dba_banner_account_util.sql
@@ -70,16 +70,16 @@ AS
 
 --  procedure ban_acct_create           (acct, type)
     procedure ban_acct_create_admin_pages   (p_netid IN dba_users.username%type,p_class_list in varchar2);
-    procedure ban_acct_create_buynd     (p_netid  IN sys.dba_users.username%type);
-    procedure ban_acct_create_eprint    (p_netid  IN sys.dba_users.username%type,p_class_list in varchar2);
-    procedure ban_acct_remove           (p_netid IN dba_users.username%type);
-    procedure ban_acct_revoke_class (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type);
-    procedure ban_acct_revoke_all_classes(p_netid IN dba_users.username%type);
-    procedure ban_acct_revoke_class_list(p_netid IN dba_users.username%type, p_class_list in varchar2);
-    procedure ban_acct_remove_gobeacc(p_netid IN dba_users.username%TYPE);
---  procedure ban_acct_remove_fundorg   (acct)
---  procedure ban_acct_remove_hrfundorg (acct)
---  procedure ban_acct_remove_gobeacc   (acct)
+    procedure ban_acct_create_inb_sreg_user (p_netid IN dba_users.username%type,p_class_list in varchar2);
+    procedure ban_acct_create_buynd         (p_netid  IN sys.dba_users.username%type);
+    procedure ban_acct_create_eprint        (p_netid  IN sys.dba_users.username%type,p_class_list in varchar2);
+    procedure ban_acct_remove               (p_netid IN dba_users.username%type);
+    procedure ban_acct_revoke_class         (p_netid IN dba_users.username%type, p_class in bansecr.gtvclas.gtvclas_class_code%type);
+    procedure ban_acct_revoke_all_classes   (p_netid IN dba_users.username%type);
+    procedure ban_acct_revoke_class_list    (p_netid IN dba_users.username%type, p_class_list in varchar2);
+    procedure ban_acct_remove_gobeacc       (p_netid IN dba_users.username%TYPE);
+    procedure ban_acct_remove_fundorg       (p_netid in dba_users.username%type);
+    procedure ban_acct_remove_hrfundorg     (p_netid in dba_users.username%type);
 --  procedure ban_acct_clone_acct       (acct, clone)
 
 -- -----------------------------------------------------------------------------
